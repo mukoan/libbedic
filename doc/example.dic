@@ -1,0 +1,65 @@
+id=Example dictionary
+description=This is an example dictionary file that demonstrates the syntax of bedic dictionaries. This dictionary is prepared in the simplified bedic format and must be processed with mkbedic command instead of xerox.
+
+A key-word
+{s}
+{ss}All entries are searched by key-words, which are given as the first line of an entry.{/ss}
+{ss}Immediatelly after key-word follows body of the entry, which can span several lines.{/ss}
+{ss}A properly formatted body of an entry should contain senses (\{s\}) and subsences (\{ss\}).{/ss}
+{/s}
+{s}
+{ss}An entry ends with a single empty line.{/ss}
+{/s}
+
+absent
+{s}{ps}adj{/ps}{ct}An example from an en-pl dictionary{/ct}
+{ss}nieobecny; {ex}It would be less embarrassing to have a bath while Philip was absent.{/ex}{/ss}
+{/s}
+{s}{ps}vt{/ps}
+{ss}{em}to absent o.s. from {/em} - (school) być nieobecnym w  +loc; {ex}He had absented himself from work.{/ex}{/ss}
+{ss}{ct}(meeting){/ct} być nieobecnym na  +loc{/ss}
+{ex}{em}to be absent without leave {/em} - (MIL) przebywać na samowolnym oddaleniu{/ex}
+{/s}
+
+Ex. head-word
+{s}
+{hw}Test 1{/hw}
+{ss}This demontrates how a head-word can vary between senses and can be different from the key-word.{/ss}
+{/s}
+{s}
+{hw}Test 2{/hw}
+{ss}Note the headings of the senses.{/ss}
+{ss}The head-word can also be included in the body of an entry: {hw/}.{/ss}
+{/s}
+
+Eg. cathegory
+{s}
+{ct}Sense category{/ct}
+{ss}Cathegories can belong to senses.{/ss}
+{ss}{ct}Subsence category{/ct} or subsenses.{/ss}
+{/s}
+
+Eg. emphasising and deemphasizing
+{s}
+{ss}Some phrases can be {em}emphasized{/em}{/ss}
+{ss}And other {de}deemphasized{/de}{/ss}
+{/s}
+
+Eg. examples
+{s}
+{ss}Examples can be part of a subsence, such as {ex}this one{/ex}{/ss}
+{ex}Or they can be part of a sence, in which case they start from a new line.{/ex}
+{/s}
+
+Eg. see also
+{s}
+{ss}Entries can be linked using see-also tag '\{sa\}'. For example: {sa}absent{/sa}{/ss}
+{ss}Links can point to a different entry, then the body of the tag. For example: {sa absent}nieobecny{/sa}{/ss}
+{/s}
+
+Eg. line break
+{s}
+{ss}Line break, like this {br/} can be inserted using '\{br/\}' tag.{/sa}{/ss}
+{/s}
+
+

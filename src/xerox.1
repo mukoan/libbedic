@@ -1,0 +1,72 @@
+.TH "xerox" 1
+.SH NAME
+xerox \- Sort and add missing entries in the bedic dictionary
+.SH SYNOPSIS
+.B xerox
+[-d] [--verbose] [--help] infile outfile
+
+.B xerox
+[--generate-char-precedence <locale>] [--verbose] [--help] dicfile
+
+.SH DESCRIPTION
+The first command invocation, with an input and output file, can be used
+to sort, generate index and add missing header properties in zbedic
+dictionary. See bedic-format.txt for more information on the format of
+bedic dictionaries.
+
+The second command invocation, with \fB--generate-char-precedence\fR
+switch, is be used to generate \fIchar-precedence\fR property. To
+learn more on \fIchar-precedence\fR, see bedic-format.txt. See also
+the description of \fB--generate-char-precedence\fR switch below.
+
+.SH OPTIONS
+
+.TP
+-d
+
+Ignored. SHCM compression is no longer used. Kept for compatibility
+with the previous version of xerox.
+
+.TP
+--generate-char-precedence <locale>, -g <locale>
+
+When this option is specified, xerox expects a file name of a single
+dictionary file. It then reads this file, finds all letters that form
+key-words in that dictionary, sorts those letters using glib collation
+for locale <locale> and then prints \fIchar-precedence\fR header
+property to the Standard Output. To see the list of available locale
+on your system configuration, invoke \fBlocale -a\fR. If the needed
+locale is missing, you may need to add it to \fI/etc/locale.gen\fR
+file and run \fBlocale-gen\fR as root. See man page of
+\fBlocale-gen\fR for more information.
+
+Note that the generated \fIchar-precedence\fR property must be
+manually corrected before using it for the dictionary. This is because
+the currect implementation of collcation in glibc is not perfect and
+additionally glib collation can not group letters, that is generate
+{aA}{bB}...
+
+.SH WARNING AND ERROR MESSAGES
+
+.TP
+Duplicate entry
+
+xerox will print out the entries that are not discernable using
+current character precedence settings and therefore they are not
+accessible by bedic (bedic requires that all key-words are unique). Do
+not use \fIsearch-ignore-chars\fR and set the proper
+\fIchar-precedence\fR property to avoid duplicate entries.
+
+.TP
+Maximum dictionary length exceeded
+
+Currectly bedic can handle dictionaries up to about 2,147,483,647
+bytes.
+
+.SH BUGS
+
+To be found.
+
+.SH "SEE ALSO"
+.BR mkbedic (1)
+

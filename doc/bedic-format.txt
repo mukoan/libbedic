@@ -1,0 +1,373 @@
+History of Changes
+------------------
+0.9.6 (02.05.2005) Rafal Mantiuk <rafm@users.sourceforge.org>
+
+* Introduced a simplified bedic format and mkbedic command
+* Extended list of tags that can be used for dictionary entries: ct,
+em, de, sa with <link>
+* Now it is possible to escape '{' and '}'
+* Note on HTML tags
+
+0.9.4 (20.02.2005) Rafal Mantiuk <rafm@users.sourceforge.org>
+
+* Added 'char-precedence' property.
+* New properties: items, builddate, description, maintainer, copyright
+
+0.8 (06.11.2002) Latchesar Ionkov <lucho@ionkov.net>
+------------------
+
+The dictionary format described in this document is referred as a full
+bedic format. To simplify creation of dictionaries and to solve some
+issues, a simplified bedic format was introduced with the release
+0.9.6. See the man page of mkbedic command and an example dictionary
+'example.dic' to learn how to create dictionaries in the simplified
+zbedic format.
+
+The bedic dictionary file has two sections -- header and entries. The
+dictionary files ends with 0 byte ("\000").
+
+I. Header section
+
+The header contains the dictionary properties. All data in the header is
+encoded using UTF-8. The end of the header is marked with 0 byte ("\000").
+
+1. Properties
+
+A property definition has the following format:
+
+	name '=' value LF
+
+where LF is line feed character (\012). Both the name and the value can
+contain 0 and LF characters that are encoded as defined:
+
+	\0000	\0033 \0060	(ESC '0')
+	\0012	\0033 \0156	(ESC 'n')
+	\0033	\0033 \0145	(ESC 'e')
+
+where ESC is 033. The name cannot contain '=' (075) character.
+
+These are the currently defined properties:
+
+	- id			(required)
+	  The name of the dictionary
+
+	- max-entry-length	(default 8192) (set by xerox)
+	  Maximum length of a database entry
+
+	- max-word-length	(default 50) (set by xerox)
+	  Maximum length of an word
+
+	- index (set by xerox)
+	  Dictionary index. The format of the index is described below
+
+	- compression-method	(default none) (set by xerox)
+	  Compression method. Allowed values are 'none' and 'shcm'.
+
+	- shcm-tree		(required if compression-method is shcm) (set by xerox)
+	  Data used by the shcm compression algorithm.
+
+	- search-ignore-chars (default '-.' or none if char-precedence is given)       
+          The characters defined in this property are ignored when a
+          search is performed. For example if the user typed 'b-all'
+          the word 'ball' will be found. Using this option is not
+          recommended, since it may result in duplicate key-words. A
+          proper char-precedence should be used instead of this
+          option.
+
+        - char-precedence (by default English 'ignore-case' precedence is used)
+
+          Specifies the order of characters that should be used for
+          sorting and searching the dictionary. All the characters
+          used in <word> entries of a dictionary should be listed in
+          the right order. The character encoding must be
+          UTF-8. Characters can be grouped together using {} brackets
+          in order to specify the major sorting order. For example:
+
+          char-precedence={aAäÄ}{bB}{cC}...
+
+          tells that words "Fl?he" "Flach" and "Flag" will be sorted:
+          "Flach", "Fl?he", "Flag". Without the brackets the same
+          words would be sorted: "Flach", "Flag", "Fl?he", which is
+          not the order that is expected in the dictionary. Currently
+          characters '{' and '}' can not be included in the character
+          precedence list. The characters not included in the
+          character precedence list will be treated as they were at
+          the beginning of the list (put in front of all other
+          characters). If char-precedence is used, the dictionary is
+          case sensitive, therefore both upper and lower case
+          characters must be listed. Some examples of char-precedence
+          entries can be found in libbedic/doc directory of the source
+          distribution.
+
+        - items (set by xerox)
+          Number of items in the dictionary.
+
+        - dict-size (set by xerox)
+          Size of dictionary entries in bytes (uncompressed).
+
+        - builddate (set by xerox)
+          Date when the dictionary file was built.
+          
+        - description (default none)
+          A short description (10-200 characters) of the dictionary or
+          the source of the data. Expected UTF8 encoding.
+          
+        - maintainer (default none)
+          Person to contact regarding problems with this dictionary
+          build. Contact info should be in the format 'FirstName
+          LastName <email>'. Expected UTF8 encoding.
+
+        - copyright (default none)
+          Copyright text up to 1024 characters. Expected UTF8 encoding.
+
+	- commentXX
+	  Additional notes. Use only for information that does not fit
+	  into 'description', 'maintainer' and 'copyright'
+	  properties. The two digit number XX should start with
+	  00. Expected UTF8 encoding.
+
+        - bedic-version (set by xerox)         
+          Version of bedic library. Used internally to trace
+          incompatibilities between versions. Added in libbedic 1.1.
+
+All other properties are ignored. You should never set the properties
+marked as 'set by xerox'. Those properties will be automatically
+generated when the dictionary is processed with the xerox command.
+
+2. Index property
+
+If the index property exists, it will improve the speed for dictionary
+lookup. The index contains collection of (word, offset) pairs. The
+words are sorted (ignoring the character case and the characters
+defined in search-ignore-chars or using char-precedence property (see
+above). The offset is relative to the beginning of the entries section
+of the file. The pairs are separated by 0 byte ("\000"), the word and
+the offset in a pair are separated by \012 character (note that both
+characters are encoded the same way as all the property values \033
+\0060 an \033 \0156). Index property is normally generated by xerox.
+
+II. Entries section
+
+The entries section contains collection of dictionary entries. The
+entries have variable size. The entries have two parts - key-word and
+meaning. The key-word should be unique. The entries are sorted by the
+key-word value according to char-precedence defined in the header.
+
+1. Entries section format
+
+	<entry0> '\0' <entry1> ... <entryN> '\0'
+
+The entries in the database are separated by 0 byte ("\000").
+
+2. Entries format
+
+	<key-word> '\012' <meaning>
+
+The <key-word> and <meaning> are separated by \012 (LF) character.
+
+3. Meaning format
+
+The <meaning> is not free-text format. It has a structure defined by
+number of tags. The tags has the following format:
+
+	'{' tag-name '}'	start tag
+	'{' '/' tag-name '}'	end tag
+	'{' tag-name '/' '}'	empty tag
+
+Characters '{' and '}' are escaped if they are preceded with '\'. To
+insert '\' in the text, use '\\'.
+                
+A dictionary entry has one or more <senses>. If the word has different
+homographs (ie. wordforms that are different parts of speech), they
+should be defined as different <senses>. The different meanings of a
+<sense> should be encoded as <sub-senses>.       
+
+For every sense <part-of-speech> and <pronunciation> may be defined.
+
+In a sense one or more <sub-senses> are defined. The <sub-sense> tags
+contain a translation/definition of the word. They may contain
+pointers to different word in the dictionary (<see-also> tag),
+examples of usage (<example>) tag or <headword> tag. <category> gives
+additional information on <sense> or <sub-sense>, for example 'biol.'
+if particular <sense> is used only in biology. <phrase> can emphasize
+expressions, where the <key-word> is used.
+
+4. Detailed description of the tags (first tag, then its name):
+
+{s} <sense>  
+
+  <meaning> contains one or more <senses>
+ 
+  <sense> defines one or more homographs of the <key-word>
+  (ie. wordforms that are different parts of speech).
+
+{ss} <sub-sense>  
+
+  each <sense> contains one or more <sub-senses>
+
+  <sub-sense> gives one or more meanings of the <sense>.
+  
+{ps} <part-of-speech>
+
+  each sense contains zero or one <part-of-speach>
+
+  <part-of-speach> tag primarily tells what part of speach the sense
+  belongs to. For example 'v.' for verb, or 'n.' for noun. The tag may
+  also contain additional information on grammar, like gender.
+
+{ct} <category>
+
+  each <sense> or <sub-sense> contains zero or one <category>
+
+  <category> can denote the field the word is used in. For example
+  'math.' for mathematics or 'biol.' for biology. <category> is less
+  emphasized as <part-of-speach> or any other text.
+  
+{pr} <pronunciation>
+
+  each <sense> contains zero or one <pronunciation>
+
+{sa}, {sa <link>} <see-also>
+
+  each <sub-sense>, <example>, <phrase> can contain any number of <see-also>
+
+  <see-also> is a link to another entry in the same dictionary. If the
+  does not contain <link>, the body of this tag must be exactly the
+  same as an another <key-word> in this dictionary. If <link> is
+  given, it must be one of the <key-words> in this dictionary, but the
+  body of the tag can be anything else.
+  
+{ex} <example>
+
+  each <sub-sense> or <sense> can contain any number of <examples>
+
+  <example> shows an example usage of the <sub-sense> or <sense>. If an
+  <example> is an item in the <sense> it's shown as unordered item in
+  the list of <sub-senses>.
+
+{em} <emphasize>
+
+  each <example> or <sub-sense> can contain zero or more <emphasizes>
+
+  <emphasize> will stress the phrase it contains, for example with
+  bold font.
+
+{de} <deemphasize>
+
+  each <example> or <sub-sense> can contain zero or more <deemphasizes>
+
+  <deemphasize> will lessen stress on the phrase it contains, for
+  example using less salient font color.
+  
+{hw/} <headword-empty-tag>
+
+  each <example>, <sub-sense> or <phrase> can contain zero or more
+  <headword-empty-tags>
+
+  <headword-empty-tag> is substituted with the <key-word>
+
+{hw} <headword>
+
+  each <sense> can contain zero or one <headword>
+
+  In general different <key-words> should be entered as separate
+  <entries> in the dictionary. However, for some dictionaries it may
+  be more convenient to put similar <key-words> under the same entry
+  as different <senses>. For example a <key-word> can be a root of
+  separate words, which are listed as <senses>. For each <sense>
+  <headword> tag is used to change <key-word> for the sense it belongs
+  to.
+
+{img src="image_file"\} <image>
+
+  image can be placed anywhere in the text.
+
+  'src' must contain a relative path and placed in the directory named
+  the same as the dictionary file, but without '.dic.dz', '.hdic' or
+  '.edic' extension. Such directory must be in the same location as
+  the dictionary file. For example, if the dictionary file is named
+  'test.dic.dz', you should create directory 'test' in the same
+  directory as the dictionary file, copy there file 'image.png' and
+  then insert tag '{img src="image.png"/}'.
+
+  This tag has the same syntax as the <img> tag in HTML. The
+  difference is that a proper path is inserted just before the name
+  given by 'src'.
+
+  This tag is available from version 1.1
+
+  
+Examples:
+
+The meaning of the word test1
+
+	{s}{ps}n{/ps}{pr}test{/pr}
+<           {ss}sub-sense one{/ss}
+           {ss}{ct}math.{/ct}sub-sense two{/ss}
+           {ss}headword: {hw/}{/ss}
+           {ex}{ph}test a test{ph} description{/ex}
+        {/s}
+	{s}{ps}v{/ps}{pr}test{/pr}{ct}biol.{/ct}
+           {ss}see also {sa}hop{/sa} {ex}hop la{/ex}{/ss}
+        {/s}
+
+will be shown as
+
+	test n /test/
+
+	1. sub-sense one
+	2. (math.) sub-sense two
+        3. headword: test
+        *test a test* description
+
+	-------------------------------
+
+	test v /test/ (biol.)
+
+	see also _hop_ (hop la)
+
+5. HTML and bedic tags
+
+Besides bvedic's tags, which are written with curly brackets {},
+<entries> can contain some HTML tags. For zbedic, only those tags are
+rendered, that are handled by QTextView class in QT library. The use
+of HTML tags should be avoided if possible, so that other applications
+based on bedic library, which does not render HTML, can use the
+dictionary.
+
+III. SHCM Compression
+
+!!Obsolete section. SHCM compression is no longer used, since it has
+been replaced with more efficient zlib based compression (dictzip)!!
+
+bedic supports simple Huffman code based compression. The compression method
+is based on shcodec program by Alexander Simakov <xander@online.ru>.
+
+To enable fast lookups, every word and meaning are compressed separately.
+The special characters in the compressed data '\0', '\n', and '\033' are
+encoded the same way as in the property values.
+
+IV. Step by step guide for building new dictionaries
+
+1. Prepare plain-text dictionary file in the format described in
+   sections I and II. The only properties you should care of is 'id' and
+   perhaps 'search-ignore-chars'.
+
+2. If necessary, convert from the character encoding of the dictionary file
+   to utf8. 'konwert' program can do the work in most cases.
+
+3. To create index and fill missing properties, run xerox:
+
+   xerox -d raw_data.dic plde-0.9.0.dic
+   
+   You can find xerox in libbedic/tools. -d option disables
+   compression shcm, which is less efficient than dictzip.
+
+4. Run dictzip tool (www.dict.org) on the dictionary to compress it:
+
+   dictzip plde-0.9.0.dic
+
+   It should replace plde-0.9.0.dic with much smaller
+   plde-0.9.0.dic.dz. The dictionary file is ready to be used with
+   zbedic.
+   

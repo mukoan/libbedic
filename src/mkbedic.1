@@ -1,0 +1,106 @@
+.TH "mkbedic" 1
+.SH NAME
+mkbedic \- Create a dictionary file for bedic dictionary readers from a simplified dictionary format file
+.SH SYNOPSIS
+.B mkbedic
+[--no-header] [--header-file <file>] [--id <id_field>] [--verbose] [--help] <infile> <outfile>
+
+.SH DESCRIPTION
+\fBmkbedic\fR sorts, generates index and adds missing header
+properties to bedic dictionary file. Unlike \fBxerox\fR command,
+\fBmkbedic\fR expects \fI<infile>\fR to be a dictionary file in a
+\fBsimplified bedic format\fR (see the next section). \fI<outfile>\fR
+is a resulting dictionary in full zbedic format (readable by
+zbedic). See bedic-format.txt for more information on the format of
+bedic dictionaries. If \fI<file>\fR (--header-file option) or
+\fI<outfile>\fR argument is a dash '-', the data is read or written to
+the Standard Input or Output.
+
+.SH SIMPLIFIED BEDIC FORMAT
+
+Simplified bedic format has been introduced to overcome two
+shortcomings of the original full bedic format: to get rid of binary
+characters (such as 0 bytes), which are difficult to generate in
+scripts, and to make editing dictionaries in a text editor as easy as
+possible. The drawback of the new format is that the dictionaries in
+the simplified bedic format are not readable by the bedic library or
+any bedic dictionary reader, and must be first processed with
+\fBmkbedic\fR command.
+
+The following is an example dictionary in the simplified bedic format:
+.RS
+.sp
+nid=Example dictionary
+.sp
+Keyword 1
+.br
+{s}{ss}This is a description of the {hw/},
+.br
+which can span several lines{/ss}{s}
+.sp
+Keyword 2
+.br
+{s}{ss}A single keyword can contain multiple
+.br
+senses and subsenses{/ss}
+.br
+{ss}This is the second subsense of the first sense{/ss}{/s}
+.br
+{s}{ss}And this is the second sense{/ss}{/s}
+.sp
+.RE
+The first part of the file is a header with multiple properties
+followed by an empty line. Then follow dictionary entries, each
+separated by a single empty line. Each entry can span several lines,
+but the first line is always a keyword. Format of entries (meanings of
+keywords) is the same as in the case of the full bedic format (see
+\fIbedic-format.txt\fR for the full description).
+.SH OPTIONS
+.TP
+--header-file <file>, -h <file>
+
+bedic header with the properties can be stored in a separate file,
+which can be specified with this option. If \fI<infile>\fR already
+contains some properties, they will be overwriten (if names match)
+with those in the <file>.
+
+.TP
+--no-header, -n
+
+Specify this option if the \fI<infile>\fR does not contain a header
+(starts with dictionary entries).
+
+.TP
+--id <id_field>, -i <id_field>
+
+\fIid\fR property in the header will be set to the argument of this
+option. This option overwrites both properties from the <infile> and
+the <file> specified with \fB--header-file\fR option.
+
+.SH WARNING AND ERROR MESSAGES
+
+.TP
+Duplicate entry
+
+mkbedic will print out the entries that are not discernable using
+current character precedence settings and therefore they are not
+accessible by bedic (bedic requires that all key-words are unique). Do
+not use \fIsearch-ignore-chars\fR and set the proper
+\fIchar-precedence\fR property to avoid duplicate entries.
+
+.TP
+Maximum dictionary length exceeded
+
+Currectly bedic can handle dictionaries up to about 2,147,483,647
+bytes.
+
+.SH BUGS
+
+mkbedic may not handle very large files, since it uses libc IO functions.
+
+\fB--generate-char-precedence\fR option is not supported. Run xerox on
+the \fI<outfile>\fR to find to generate a char precedence line.
+.SH AUTHOR
+Rafal Mantiuk <rafm@users.sourceforge.net>
+.SH "SEE ALSO"
+.BR xerox (1)
