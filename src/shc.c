@@ -170,7 +170,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen) {
 
         else if(dpth==(dpthins-1)) {
             if(freq[symb[first]]==(last+1)) first++;
-            else avbl--; root=1; inserted++;
+            else avbl--; root=1; inserted++;          // FIXME are all 3 statements "else" ?
         }
 
         while(avbl>0) {

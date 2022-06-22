@@ -43,7 +43,7 @@
 
 #include "utf8.h"
 
-char terminal_keyword[] = { 0xc2, 0xb6 
+char terminal_keyword[] = { 0xc2, 0xb6     // FIXME out of range for signed char
 };
 
 

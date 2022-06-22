@@ -9,24 +9,25 @@ ifeq ($(ARCH), arm)
     CXX=arm-linux-g++
     LD=arm-linux-g++
     ARCH_CXXFLAGS=-I$(QTDIR)/include -O2 -DARCH_ARM
+    LIBS=-L/opt/Qtopia/sharp/lib -lz -lsqlite3
     DEBUG=1
 else
     ARCH=x86
     CC=gcc
     CXX=g++
     LD=g++
-    ARCH_CXXFLAGS=-DARCH_X86
+    ARCH_CXXFLAGS=-O2 -DARCH_X86
     DEBUG=1
 endif
 
 OBJDIR=objs.$(ARCH)
 TARGET=$(OBJDIR)/libbedic.a
 COMMON_CFLAGS=-pipe -Wall -W
-COMMON_CXXFLAGS=-pipe -Wall -DQWS -fno-rtti
+COMMON_CXXFLAGS=-pipe -Wall -DQWS -fno-rtti -fPIC
 INCLUDES=-Iinclude
 CFLAGS=$(COMMON_CFLAGS) $(ARCH_CFLAGS) $(INCLUDES)
 CXXFLAGS=$(COMMON_CXXFLAGS) $(ARCH_CXXFLAGS) $(INCLUDES) -DVERSION=\"$(DOT_RELEASE)\"
-LIBS=-L/opt/Qtopia/sharp/lib -lz -lsqlite3
+LIBS+=-lz -lsqlite3
 
 ifdef DEBUG
     CXXFLAGS+=-g
