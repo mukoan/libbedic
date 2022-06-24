@@ -1,9 +1,16 @@
+/**
+ * @file   file.cpp
+ * @brief  Handle compressed files
+ * @author Lyndon Hill and others
+ */
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "file.h"
 
 #define OUT_BUFFER_SIZE 8192

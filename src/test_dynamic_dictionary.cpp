@@ -1,9 +1,14 @@
-#include <iostream>
+/**
+ * @file   test_dynamic_dictionary.cpp
+ * @brief  Test unit for DynamicDictionary class
+ * @author Lyndon Hill and others
+ */
 
 #include <stdlib.h>
 
-#include "zbedic.h"
+#include <iostream>
 
+#include "bedic.h"
 
 int main()
 {
@@ -13,9 +18,9 @@ int main()
 
   if( dic == NULL ) {
     std::cerr << "Failed with error: " << errorMessage << "\n";
-    return 0;
+    return EXIT_FAILURE;
   } else {
-    std::cerr << "Successful\n";
+    std::cerr << "Created dynamic dictionary\n";
   }
 
   const int N = 10;
@@ -40,25 +45,24 @@ int main()
 
     if( !dic->updateEntry( item, description.c_str() ) ) {
       std::cerr << "Failed with error: " << dic->getErrorMessage() << "\n";
-      return 0;
+      return EXIT_FAILURE;
     }
-    
   }
 
   std::cerr << "Listing all entries\n";
   DictionaryIteratorPtr it = dic->begin();
   if( !it.isValid() ) {
     std::cerr << "Failed with error: " << dic->getErrorMessage() << "\n";
-    return 0;
+    return EXIT_FAILURE;
   }
+
   while( !(it == dic->end()) ) {
     std::cerr << "# " << it->getKeyword() << " - " << it->getDescription() << "\n";
     if( !it->nextEntry() ) {
       std::cerr << "Failed with error: " << dic->getErrorMessage() << "\n";
-      return 0;
+      return EXIT_FAILURE;
     }
-  } 
-  
-  return 1;
-  
+  }
+
+  return EXIT_SUCCESS;
 }

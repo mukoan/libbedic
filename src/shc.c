@@ -164,7 +164,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen) {
         if(dpth>=dpthins) {
             root=1<<(dpth-dpthins);
             if((inserted+root)>removed)
-            root=removed-inserted;
+            root=removed-inserted;                    // FIXME only this line is part of if condition?
             inserted+=root; avbl-=root;
         }
 

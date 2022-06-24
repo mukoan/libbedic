@@ -1,27 +1,27 @@
-/****************************************************************************
-* bedic_wrapper.cpp
-*
-* Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
-*
-* This file contains a wrapper for the original bedic Dictionary class
-* (file dictionary.cpp), so that it can be intefaced as a
-* StaticDictionary. This dictionary does not implement
-* DictionaryIterator::previous().
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-****************************************************************************/
+/**
+ * @file   bedic_wrapper.cpp
+ * @brief  This file contains a wrapper for the original bedic Dictionary class
+ *         (file dictionary.cpp), so that it can be intefaced as a
+ *         StaticDictionary. This dictionary does not implement
+ *         DictionaryIterator::previous().
+ * @author Lyndon Hill and others
+ *
+ * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include "bedic.h"
 #include "dictionary.h"
@@ -60,7 +60,7 @@ public:
 
   virtual const char *getErrorMessage();
 
-  virtual bool BedicDictionary::checkIntegrity();
+  virtual bool checkIntegrity();
   
 };
 

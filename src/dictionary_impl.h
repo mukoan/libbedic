@@ -1,5 +1,7 @@
-/****************************************************************************
- * dictionary_impl.h
+/**
+ * @file   dictionary_impl.h
+ * @brief  
+ * @author Lyndon Hill and others
  *
  * Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
  * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
@@ -20,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- ****************************************************************************/
+ */
 
 #ifndef DICTIONARY_IMPL_H
 #define DICTIONARY_IMPL_H
@@ -413,6 +415,7 @@ public:
   static string unescape(const string& s);
 };
 
-extern char terminal_keyword[];
+extern unsigned char terminal_keyword[];
 
-#endif
+#endif  /* DICTIONARY_IMPL_H */
+

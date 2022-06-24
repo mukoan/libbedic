@@ -1,26 +1,28 @@
-/****************************************************************************
-* 
-* Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
-*
-* Makes copy of a dictionary, compressing or decompressing it.
-* During the copy creation the words are also sorted properly.
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-****************************************************************************/
+/**
+ * @file   mkbedic.cpp
+ * @brief  Makes copy of a dictionary, compressing or decompressing it.
+ *         During the copy creation the words are also sorted properly.
+ * @author Lyndon Hill and others
+ *
+ * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include <stdio.h>
+#include <string.h>
 #include <fcntl.h>
 #include <exception>
 #include <iostream>
@@ -52,7 +54,7 @@ class QuietException
 
 class XeroxException: public std::exception
 {
-  string message;
+  std::string message;
 public:
   XeroxException( const char *message ): message( message )
   {
@@ -61,26 +63,26 @@ public:
   virtual ~XeroxException() throw()
   {
   }
-  
-  
+
+
   virtual const char *what () const throw ()
   {
     return message.c_str();
   }
-  
+
 };
 
-// ==================================================================
-// Dictionary source - a general source of dictionary entries for xerox
-// ==================================================================
-
+/**
+ * @class DictionarySource
+ * @brief A general source of dictionary entries for xerox
+ */
 class DictionarySource
 {
 public:
   virtual ~DictionarySource()
   {
   }
-  
+
   virtual bool firstEntry() = 0;
 
   /**
@@ -90,7 +92,7 @@ public:
 
   /**
    * @return false if EOF
-   */  
+   */
   virtual bool readEntry( long pos, string &keyWord, string &description ) = 0;
 };
 
@@ -100,21 +102,21 @@ public:
 
 struct entry_type {
   static CollationComparator *currentDict;
-  string word;
+  std::string word;
   CanonizedWord canonizedWord;
   int fidx;
   int pos;
   int len;
   int offset;
 
-  entry_type(const string &w, const CanonizedWord &canonizedWord, int i, int p):
+  entry_type(const std::string &w, const CanonizedWord &canonizedWord, int i, int p):
     word( w ), canonizedWord( canonizedWord ), fidx( i ), pos( p )
   {
   }
-		
+
   bool operator<(const entry_type& e2) const {
     int cmp = currentDict->compare( canonizedWord, e2.canonizedWord );
-    return cmp < 0;    
+    return cmp < 0;
   }
 };
 
@@ -122,7 +124,7 @@ CollationComparator *entry_type::currentDict = NULL;
 
 class XeroxCollationComparator: public CollationComparator
 {
-  set<int> usedCharacters;  
+  set<int> usedCharacters;
 public:
   void checkIfCharsCollated( string &w )
   {    
@@ -133,7 +135,7 @@ public:
       while (*s != 0) {
         t = s;
         int rune = Utf8::chartorune(&s);
-        if( rune == 128) 
+        if( rune == 128)
           break;
         if( usedCharacters.find( rune ) == usedCharacters.end() ) {
           usedCharacters.insert( rune );
@@ -143,19 +145,19 @@ public:
             continue;
           // Character missing both in ignoreChars and precedence list
           std::cerr << WARNING_MSG << "character '" << string(t, (s-t)) <<
-            "' is missing both in search-ignore-chars and char-precedence (entry " << w << ")\n";          
+            "' is missing both in search-ignore-chars and char-precedence (entry " << w << ")\n";
         }
       }
     }
   }
-  
+
 };
 
 void processXerox( XeroxCollationComparator *comparator, DictionarySource *dictSource,
   map<string, string> &properties, FILE *fhOut )
 {
   entry_type::currentDict = comparator;
-  
+
 //  string s;
   string shcm_tree;
 
@@ -165,7 +167,7 @@ void processXerox( XeroxCollationComparator *comparator, DictionarySource *dictS
   unsigned int mrl = 0;
   unsigned int mwl = 0;
   long dsize = 0;
-    
+
   fprintf(stderr, "Reading the entries ...\n");
   int n = 0;
   dictSource->firstEntry();
@@ -174,12 +176,12 @@ void processXerox( XeroxCollationComparator *comparator, DictionarySource *dictS
     string w, s;
     long currPos = dictSource->nextEntry( w, s );
     if( currPos < 0 ) break;
-    
+
     if (mwl < w.size()) {
       mwl = w.size();
     }
 
-    comparator->checkIfCharsCollated( w );      
+    comparator->checkIfCharsCollated( w );
     
     unsigned int d = w.size() + s.size() + 2;
     if (mrl < d) {
@@ -206,7 +208,7 @@ void processXerox( XeroxCollationComparator *comparator, DictionarySource *dictS
           std::cerr << WARNING_MSG << "duplicate entry '" << it->word << "'\n";
       }
       it_previous = it;
-    }    
+    }
   }
 
   n = 0;
@@ -232,9 +234,9 @@ void processXerox( XeroxCollationComparator *comparator, DictionarySource *dictS
   map<string, string> prop(properties);
   char buf[256];
 
-  snprintf(buf, sizeof(buf), "%d", mrl);
+  snprintf(buf, sizeof(buf), "%u", mrl);
   prop["max-entry-length"] = buf;
-  sprintf(buf, "%d", mwl);
+  sprintf(buf, "%u", mwl);
   prop["max-word-length"] = buf;
 
   if (idx.size() > 0) {
@@ -258,24 +260,24 @@ void processXerox( XeroxCollationComparator *comparator, DictionarySource *dictS
     int written = fprintf( fhOut, "%s=%s\x0a",
       DictImpl::escape(entry.first).c_str(), DictImpl::escape(entry.second).c_str() );
     if( written < 0 )
-      throw XeroxException( "Cannot write properties" );        
+      throw XeroxException( "Cannot write properties" );
   }
 
-  fwrite( "\x00", 1, 1, fhOut );    
+  fwrite( "\x00", 1, 1, fhOut );
 
   for(unsigned int i = 0; i < entries.size(); i++) {
     string w, s;
     dictSource->readEntry( entries[i].pos, w, s );
 
     fprintf( fhOut, "%s\x0a%s", w.c_str(), s.c_str() );
-    fwrite( "\x00", 1, 1, fhOut );    
-      
+    fwrite( "\x00", 1, 1, fhOut );
+
     if (i % 1024 == 0) {
       fprintf(stderr, ".");
     }
   }
   fprintf(stderr, "\n");
-    
+
 }
 
 
@@ -323,7 +325,7 @@ public:
   {
     return lineNo;
   }
-  
+
 };
 
 // ==================================================================
@@ -334,7 +336,7 @@ static void readProperties( LineReader *in, map<string, string> &properties )
 {
   while( true ) {
     char *read = in->readLine();
-    
+
     if( read == NULL )        // EOF
       return;
 
@@ -346,21 +348,21 @@ static void readProperties( LineReader *in, map<string, string> &properties )
       ostringstream msg;
       msg << "line " << in->getLineNo() << ": '=' missing in the property line: '" << read << "'"; 
       throw XeroxException( msg.str().c_str() );
-    }      
-    
+    }
+ 
     string name = DictImpl::unescape(line.substr(0, n));
     string value = DictImpl::unescape(line.substr(n+1));
     properties[name] = value;
-  }  
+  }
 }
 
 // ==================================================================
 // New xerox for simplified dictionary format
 // ==================================================================
 class TextDictSrc: public DictionarySource, public LineReader {
-  
+
   long firstPos;
-  
+
 public:
   TextDictSrc( FILE *fhDic ): LineReader( fhDic )
   {
@@ -369,7 +371,7 @@ public:
   virtual ~TextDictSrc()
   {
   }
-  
+
 
   void setFirstPos()
   {
@@ -396,18 +398,18 @@ public:
       throw XeroxException( "Maximum dictionary length exceeded" );
 
     if( fseek( fh, pos, SEEK_SET ) != 0 )
-      throw XeroxException( "Cannot read dictionary file (fseek failed)" );      
+      throw XeroxException( "Cannot read dictionary file (fseek failed)" );
 
     do {
       char *read = readLine();
       if( read == NULL ) 
         return false;
-    
+
       keyWord = read;
     } while( keyWord.empty() );
 
     description = "";
-    
+
     while( true ) {
       char *read = readLine();
       if( read == NULL )
@@ -423,20 +425,21 @@ public:
       msg << "line " << getLineNo() << ": Missing description for item '" << keyWord << "'"; 
       throw XeroxException( msg.str().c_str() );
     }
-    
+
     return true;
-  }  
+  }
 };
 
 
 // =========== Main =============
 
 static void printHelp() {
-  std::cerr << "Usage: " PROG_NAME " [--no-header] [--header-file] [--id] [--verbose] [--help] infile"
- " outfile\nSee the man page for more information\n";
+  std::cerr << "Usage: " PROG_NAME " [--no-header] [--header-file] [--id] "
+            << "[--verbose] [--help] infile outfile\n"
+            << "See the man page for more information\n";
 }
 
-static void errorCheck( bool condition, char *string )
+static void errorCheck( bool condition, char *string )  // FIXME could confuse with std::string
 {
   if( !condition ) {
     throw XeroxException( string );
@@ -445,7 +448,7 @@ static void errorCheck( bool condition, char *string )
 
 
 int main(int argc, char** argv) {
-  
+
   try {
     bool noHeader = false;
     char *headerFile = NULL;
@@ -504,6 +507,7 @@ int main(int argc, char** argv) {
         fhOut = stdout;
       else
         fhOut = fopen( destFileName, "wb" );
+
       errorCheck( fhOut != NULL, "Cannot open output file for writing" );
 
       // property values
@@ -523,6 +527,7 @@ int main(int argc, char** argv) {
           fhHeader = stdin;
         else
           fhHeader = fopen( headerFile, "r" );
+
         errorCheck( fhHeader != NULL, "Cannot open header file for reading" );
         LineReader headerLR( fhHeader );
         readProperties( &headerLR, properties );
@@ -531,10 +536,10 @@ int main(int argc, char** argv) {
 
       if( id != NULL )
         properties["id"] = id;
-      
+
       {
-        string precedence = properties["char-precedence"];  
-        string ic = properties["search-ignore-chars"];  
+        string precedence = properties["char-precedence"];
+        string ic = properties["search-ignore-chars"];
 
         if (ic.size() == 0) {
           ic = !precedence.empty() ? "" : "-.";
@@ -542,16 +547,16 @@ int main(int argc, char** argv) {
         }
         comparator.setCollation( precedence, ic );
       }
-      
+
       errorCheck( properties.find( "id" ) != properties.end(),
         "missing required 'id' property in the header");
-      
+
       processXerox( &comparator, &source, properties, fhOut );
-      
+
       fclose( fhDic );
       if( fhOut != stdout ) fclose( fhOut );
     }
-    
+
     return EXIT_SUCCESS;
   }
   catch( QuietException  ex ) {
@@ -560,6 +565,5 @@ int main(int argc, char** argv) {
   catch( XeroxException ex ) {
     std::cerr << PROG_NAME ": " << ex.what() << "\n";
   }
-  
 
 }

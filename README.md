@@ -26,10 +26,12 @@ of this code should be considered GPL v2 unless individual files state otherwise
 * Lyndon Hill (myself)
 * Rafal Mantiuk
 * Latchesar Ionkov
-* Radostin Radnev
+* Radostin Radnev, author of kbedic
 * Simakov Alexander
-* Rob Pike and Howard Trickey for utf8.h and utf8.cpp from 9libs library (c) Lucent Technologies
+* Rob Pike and Howard Trickey, for utf8.h and utf8.cpp from 9libs library, (c) Lucent Technologies
 
 # Changelog
 
+24.06.2022  First pass of fixing compilation errors, successfully built all objects
+23.06.2022  Reviewed test_dynamic_dictionary and first pass of mkbedic
 21.06.2022  Start of this new fork to make a publicly releaseable version

@@ -1,3 +1,10 @@
+/**
+ * @file   file.h
+ * @brief  Handle compressed files
+ * @author Lyndon Hill and others
+ */
+
+#pragma once
 #ifndef FILE_H
 #define FILE_H
 
@@ -42,4 +49,5 @@ protected:
 	int cchunk;	// current chunk
 };
 
-#endif
+#endif  /* FILE_H */
+

@@ -151,4 +151,5 @@ void sh_CalcDecode(uchar *len, uchar *symb, uchar *base, uchar *offs, uchar *cac
 }
 #endif
 
-#endif /* SHC_INCLUDED */
+#endif  /* SHC_INCLUDED */
+

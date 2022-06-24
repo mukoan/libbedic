@@ -1,24 +1,24 @@
-/****************************************************************************
-* dynamic_dictionary.cpp
-*
-* Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
-*
-* This is an implementation of editable - dynamic dictionary
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-****************************************************************************/
+/**
+ * @file   dynamic_dictionary.cpp
+ * @brief  This is an implementation of editable - dynamic dictionary
+ * @author Lyndon Hill and others
+ *
+ * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include <stdio.h>
 
@@ -66,7 +66,7 @@ protected:
 
   bool bind();
 
-  bool SQLiteDictionary::findNext( const char *keyword, std::string &next, bool or_same );
+  bool findNext( const char *keyword, std::string &next, bool or_same );
   
 public:
   ~SQLiteDictionary();
@@ -380,7 +380,7 @@ bool SQLiteDictionary::findNext( const char *keyword, std::string &next, bool or
   if( rc == SQLITE_ROW ) {
     next = (const char*)sqlite3_column_text( stmt, 0 );
   } else if( rc == SQLITE_DONE ) {
-    next = terminal_keyword;
+    next = (char *)(terminal_keyword);  // FIXME do proper C++ cast
   } else {
     errorString = std::string(sqlite3_errmsg(db));
     sqlite3_reset( stmt );
@@ -402,7 +402,7 @@ DictionaryIteratorPtr SQLiteDictionary::begin()
 
 DictionaryIteratorPtr SQLiteDictionary::end()
 {
-  return DictionaryIteratorPtr( new SQLiteDictionaryIterator( this, terminal_keyword ) );
+  return DictionaryIteratorPtr( new SQLiteDictionaryIterator( this, (char *)(terminal_keyword) ) );  // FIXME do proper C++ cast
 }
   
 DictionaryIteratorPtr SQLiteDictionary::findEntry( const char *keyword, bool &matches )

@@ -1,28 +1,29 @@
-/****************************************************************************
-* xerox.cpp
-*
-* Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
-* Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
-*
-* Makes copy of a dictionary, compressing or decompressing it.
-* During the copy creation the words are also sorted properly.
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-****************************************************************************/
+/**
+ * @file   xerox.cpp
+ * @brief  Makes copy of a dictionary, compressing or decompressing it.
+ *         During the copy creation the words are also sorted properly.
+ * @author Lyndon Hill and others
+ *
+ * Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
+ * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include <stdio.h>
+#include <string.h>
 #include <fcntl.h>
 #include <exception>
 #include <iostream>
@@ -141,8 +142,7 @@ class XeroxDict : public DictImpl {
   
 public:
 
-  XeroxDict::XeroxDict(const char* filename) :
-    DictImpl( filename, false )
+  XeroxDict(const char* filename) : DictImpl( filename, false )
   {
   }
 
@@ -520,7 +520,7 @@ int main(int argc, char** argv) {
   bool generateCharPrecedence = false;
   
   try {
-    char* cmth = "none";
+    const char* cmth = "none";
     char *localeForCharPrec;
 
     static struct option cmdLineOptions[] = {

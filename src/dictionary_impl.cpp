@@ -1,5 +1,7 @@
-/****************************************************************************
- * dictionary.cpp
+/**
+ * @file   dictionary_impl.cpp
+ * @brief  
+ * @author Lyndon Hill and others
  *
  * Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
  * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
@@ -20,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- ****************************************************************************/
+ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -43,8 +45,7 @@
 
 #include "utf8.h"
 
-char terminal_keyword[] = { 0xc2, 0xb6     // FIXME out of range for signed char
-};
+unsigned char terminal_keyword[] = { 0xc2, 0xb6 };
 
 
 /***************************************************************************
@@ -830,7 +831,7 @@ void CollationComparator::setCollation( const string &collationDef, const string
     precedenceGroups.push_back( precGroup++ );
     charPrecedenceUnknown = order++;
     { // Add terminal keyword
-      const char *s = terminal_keyword;
+      const char *s = (char *)(terminal_keyword);  // FIXME do a proper C++ cast here
       int rune = Utf8::chartorune(&s);
       precedenceGroups.push_back( precGroup );
       charPrecedence[rune] = order;
