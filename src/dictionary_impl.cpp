@@ -6,7 +6,7 @@
  * Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
  * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
  *
- * This program is based on the kbedic dictionary by 
+ * This program is based on the kbedic dictionary by
  * Radostin Radnev <radnev@yahoo.com>.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -69,12 +69,12 @@ Dictionary::~Dictionary() {
  **************************************************************************/
 
 const char DictImpl::DATA_DELIMITER = '\x00';
-const char DictImpl::WORD_DELIMITER='\n';
+const char DictImpl::WORD_DELIMITER = '\n';
 
 DictImpl::DictImpl(const char* filename, bool doCheckIntegrity ): buf(NULL)
 {
   fileName = filename;
-  
+
   compressor = 0;
 
   if (strlen(filename)>3 && 
@@ -97,9 +97,9 @@ DictImpl::DictImpl(const char* filename, bool doCheckIntegrity ): buf(NULL)
 
   // In case the file ends with 0x00 0x10
   {
-    char lastBytes[2] = 
+    char lastBytes[2] =
       {
-        1, 1 
+        1, 1
       };
     fdata->read(fdata->size() - 2, (char*)&lastBytes, 2);
 
@@ -109,7 +109,7 @@ DictImpl::DictImpl(const char* filename, bool doCheckIntegrity ): buf(NULL)
 //      fprintf( stderr, "la: %d\n", lastEntryPos );
     }
   }
-  
+
   // read dictionary header
   // set the position of the first word
   firstEntryPos = readProperties();
@@ -142,7 +142,7 @@ const string& DictImpl::getName() const {
   return name;
 }
 
-const string& DictImpl::getFileName() const 
+const string& DictImpl::getFileName() const
 {
   return fileName;
 }
@@ -252,9 +252,9 @@ bool DictImpl::lastEntry() {
 }
 
 bool DictImpl::randomEntry() {
-	
+
   return readEntry(findNext(firstEntryPos + (long)
-                     ((((double) lastEntryPos) * rand()) / 
+                     ((((double) lastEntryPos) * rand()) /
                        (RAND_MAX + (double) firstEntryPos))));
 }
 
@@ -285,7 +285,7 @@ void DictImpl::bsearchIndex(const CanonizedWord &s, long& b, long& e) {
   while (ib < ie) {
     m = (ib+ie) / 2;
     int cmp = compare(s, index[m].word);
-//		printf("bsearchIndex: compare %s:%s\n", (const char*) s.utf8(), 
+//		printf("bsearchIndex: compare %s:%s\n", (const char*) s.utf8(),
 //			(const char*) index[m]->word.utf8());
 
     if (cmp == 0) {
@@ -298,7 +298,7 @@ void DictImpl::bsearchIndex(const CanonizedWord &s, long& b, long& e) {
     }
   }
 
-// Can not happen        
+// Can not happen
   if ((int)index.size() <= m) {
     assert( 0 );
           
@@ -397,7 +397,7 @@ bool DictImpl::readEntry(long pos) {
 
 long DictImpl::findPrev(long pos) {
   char s[256];
-  
+
   if (pos < firstEntryPos) {
     return firstEntryPos;
   }
@@ -414,7 +414,7 @@ long DictImpl::findPrev(long pos) {
       len = n - firstEntryPos + 1;
     }
 
-    int k = fdata->read(n - len + 1, s, len);		
+    int k = fdata->read(n - len + 1, s, len);
     if (k != len) {
       setError(strerror(errno));
       return -1;
@@ -519,7 +519,7 @@ int DictImpl::readProperties() {
     }
   }
 
-  // get the maximum length of word record 
+  // get the maximum length of word record
   // (word and sense including)
   maxEntryLength = 16384;
   ns = properties["max-entry-length"];
@@ -583,14 +583,14 @@ int DictImpl::readProperties() {
 
     index.push_back(IndexEntry(canonizeWord(word), l));
 //		printf("%s:%ld\n", word.c_str(), l);
-		
+
     n = i;
   } while (n < (int) ns.size());
 
   properties.erase("index");
   return pos;
 }
-			
+
 int DictImpl::getLine(string& line, int& pos) {
   char buf[90];
   int i, n;
@@ -636,7 +636,7 @@ bool DictImpl::checkIntegrity() {
   // of the text editors insert EOL at the end of the file
   char lastBytes[2] = 
     {
-      1, 1 
+      1, 1
     };
   fdata->read(fdata->size() - 2, (char*)&lastBytes, 2);
 
@@ -657,7 +657,7 @@ bool DictImpl::checkIntegrity() {
         return false;
         }
         }
-	}
+  }
 */
 
   // check if the index entry positions point to correct places
@@ -676,7 +676,7 @@ bool DictImpl::checkIntegrity() {
     }
   }
 
-  return true;	
+  return true;
 }
 
 string DictImpl::escape(const string& str) {
@@ -754,7 +754,7 @@ CanonizedWord CollationComparator::canonizeWord(const string& word) {
   while( *sPtr != 0 ) {
     int rune = Utf8::chartorune(&sPtr);
     if( rune == 128 ) break;
-    
+
     if( useCharPrecedence ) {
       map<int, int>::iterator itcol = charPrecedence.find( rune );
       if( itcol == charPrecedence.end() )
@@ -762,9 +762,9 @@ CanonizedWord CollationComparator::canonizeWord(const string& word) {
       else
         ss.push_back( itcol->second );
     }
-    else 
+    else
       ss.push_back( Utf8::runetoupper(rune) );
-  }       
+  }
   return ss;
 }
 
@@ -776,14 +776,14 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
     for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++ ) {
       // handle characters that are not defined in the collation string
       int ind1 = *it1 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it1;
-      int ind2 = *it2 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it2;      
+      int ind2 = *it2 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it2;
       if( precedenceGroups[ind1] < precedenceGroups[ind2] ) return -1;
-      if( precedenceGroups[ind1] > precedenceGroups[ind2] ) return 1;    
+      if( precedenceGroups[ind1] > precedenceGroups[ind2] ) return 1;
     }
     if( it1 == s1.end() && it2 == s2.end() ) {
       for( it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); it1++, it2++ ) {
         if( *it1 < *it2 ) return -1;
-        if( *it1 > *it2 ) return 1;    
+        if( *it1 > *it2 ) return 1;
       }
       return 0;
     }
@@ -792,7 +792,7 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
   } else {                      // No char precedence
     for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++ ) {
       if( *it1 < *it2 ) return -1;
-      if( *it1 > *it2 ) return 1;    
+      if( *it1 > *it2 ) return 1;
     }
     if( it1 == s1.end() && it2 == s2.end() ) return 0;
     if( it1 == s1.end() ) return -1;
@@ -800,7 +800,7 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
   }
 }
 
-void CollationComparator::setCollation( const string &collationDef, const string &ic  )
+void CollationComparator::setCollation( const string &collationDef, const string &ic )
 {
   int order = 0;
   if (collationDef.size() != 0) {
@@ -822,7 +822,7 @@ void CollationComparator::setCollation( const string &collationDef, const string
         isGroup = false;
         precGroup++;
         continue;
-      }      
+      }
       charPrecedence[rune] = order++;
       precedenceGroups.push_back( precGroup );
       if( !isGroup )
@@ -841,7 +841,7 @@ void CollationComparator::setCollation( const string &collationDef, const string
 //     map<int,int>::iterator it = charPrecedence.begin();
 //     for( ; it != charPrecedence.end(); it++ ) {
 //       std::cout << it->first << " - " << it->second << " gr.: " << precedenceGroups[it->second] << "\n";
-//     }  
+//     }
   } else
     useCharPrecedence = false;
   

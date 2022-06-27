@@ -12,41 +12,47 @@ extern "C" {
 #include <zlib.h>
 }
 
+/**
+ * @class File
+ */
 class File {
 protected:
-	int fd;
+  int fd;
 
 public:
-	File();
-	virtual ~File();
+  File();
+  virtual ~File();
 
-	virtual int open(const char* fname);
-	virtual int close();
-	virtual int size();
-	virtual int read(int pos, char* buf, int buflen);
+  virtual int open(const char *fname);
+  virtual int close();
+  virtual int size();
+  virtual int read(int pos, char *buf, int buflen);
 };
 
+/**
+ * @class DZFile
+ */
 class DZFile : public File {
 public:
-	DZFile();
-	virtual ~DZFile();
+  DZFile();
+  virtual ~DZFile();
 
-	virtual int open(const char* fname);
-	virtual int close();
-	virtual int size();
-	virtual int read(int pos, char* buf, int buflen);
+  virtual int open(const char *fname);
+  virtual int close();
+  virtual int size();
+  virtual int read(int pos, char *buf, int buflen);
 
 protected:
-	z_stream zstream;
-	int fsize;
-	int chunkLen;
-	int chunkCount;
-	int* chunks;
-	char* inbuf;
-	int outbuflen;
-	int outbufsize;
-	char* outbuf;
-	int cchunk;	// current chunk
+  z_stream zstream;
+  int   fsize;
+  int   chunkLen;
+  int   chunkCount;
+  int  *chunks;
+  char *inbuf;
+  int   outbuflen;
+  int   outbufsize;
+  char *outbuf;
+  int   cchunk;      //< current chunk
 };
 
 #endif  /* FILE_H */

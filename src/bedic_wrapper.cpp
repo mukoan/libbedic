@@ -39,18 +39,18 @@ class BedicDictionary: public StaticDictionary
 
 protected:
   Dictionary *dic;
-  
+
 protected:
   BedicDictionary( Dictionary *dic ) : dic( dic )
   {
   }
-  
+
 public:
   ~BedicDictionary();
-  
+
   virtual DictionaryIteratorPtr begin();
   virtual DictionaryIteratorPtr end();
-  
+
   virtual DictionaryIteratorPtr findEntry( const char *keyword, bool &matches );
 
   virtual const char *getName();
@@ -75,28 +75,28 @@ public:
     dic( dic ), lastEntry( lastEntry )
   {
   }
-  
+
   ~BedicDictionaryIterator()
-    {
-    }
-  
+  {
+  }
+
   const char *getKeyword() 
   {
     if( lastEntry ) return terminal_keyword;
     return dic->getWord().c_str();
   }
-  
+
   virtual const char *getDescription()
   {
     if( lastEntry ) return NULL;
     return dic->getSense().c_str();
   }
-  
+
   bool nextEntry()
   {
     if( lastEntry )
       return false;
-    
+
     bool moved = dic->nextEntry();
     if( !moved ) {
       lastEntry = true;
@@ -106,7 +106,7 @@ public:
     else
       return true;
   }
-  
+
   bool previousEntry()
   {
     return false;
@@ -125,7 +125,7 @@ DictionaryIteratorPtr BedicDictionary::begin()
   bool success = dic->firstEntry();
   if( !success )
     return DictionaryIteratorPtr( NULL );
-  
+
   return DictionaryIteratorPtr( new BedicDictionaryIterator( dic, false ) );
 }
 
@@ -134,7 +134,6 @@ DictionaryIteratorPtr BedicDictionary::end()
   return DictionaryIteratorPtr( new BedicDictionaryIterator( dic, true ) );
 }
 
-  
 DictionaryIteratorPtr BedicDictionary::findEntry( const char *keyword, bool &matches )
 {
   bool subword;
@@ -156,7 +155,6 @@ const char *BedicDictionary::getFileName()
   return dic->getFileName().c_str();
 }
 
-
 bool BedicDictionary::getProperty( const char *propertyName, std::string &propertyValue )
 {
   propertyValue = dic->getProperty( propertyName );
@@ -167,7 +165,6 @@ const char *BedicDictionary::getErrorMessage()
 {
   return dic->getError().c_str();
 }
-
 
 bool BedicDictionary::checkIntegrity()
 {

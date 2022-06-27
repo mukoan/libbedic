@@ -14,7 +14,7 @@ int main()
 {
   std::string errorMessage;
   
-  DynamicDictionary *dic = createDynamicDictionary( "test.edic", "Test dictionary", errorMessage );
+  DynamicDictionary *dic = createSQLiteDictionary( "test.edic", "Test dictionary", errorMessage );
 
   if( dic == NULL ) {
     std::cerr << "Failed with error: " << errorMessage << "\n";

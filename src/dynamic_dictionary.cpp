@@ -60,27 +60,27 @@ class SQLiteDictionary: public DynamicDictionary
   sqlite3 *getDB();
 
   CollationComparator collationComparator;
-  
+
 protected:
   SQLiteDictionary( const char *fileName );
 
   bool bind();
 
   bool findNext( const char *keyword, std::string &next, bool or_same );
-  
+
 public:
   ~SQLiteDictionary();
-  
+
   virtual DictionaryIteratorPtr begin();
   virtual DictionaryIteratorPtr end();
-  
+
   virtual DictionaryIteratorPtr findEntry( const char *keyword, bool &matches );
 
   virtual CollationComparator* getCollationComparator()
   {
     return &collationComparator;
   }
-  
+
   virtual const char *getName();
   virtual const char *getFileName();
 
@@ -90,10 +90,10 @@ public:
   virtual const char *getErrorMessage();  
 
   virtual bool isMetaEditable()
-    {
-      return true;
-    }
-  
+  {
+    return true;
+  }
+
   DictionaryIteratorPtr insertEntry( const char *keyword );
   bool updateEntry( const DictionaryIteratorPtr &entry, const char *description );
   bool removeEntry( const DictionaryIteratorPtr &entry );  
@@ -110,16 +110,16 @@ public:
                                                                            keyword( keyword )
   {
   }
-  
+
   ~SQLiteDictionaryIterator()
-    {
-    }
-  
+  {
+  }
+
   const char *getKeyword()
   {
     return keyword.c_str();
   }
-  
+
   virtual const char *getDescription()
   {
     if( !description.empty() ) 
@@ -140,13 +140,13 @@ public:
       dic->errorString = std::string(sqlite3_errmsg(db));
       sqlite3_reset( stmt );
       return NULL;
-    }    
+    }
     sqlite3_reset( stmt );
 
     return description.c_str();
-    
+
   }
-  
+
   bool nextEntry()
   {
     std::string next;
@@ -154,10 +154,10 @@ public:
       return false;
     }
     keyword = next;
-    description = "";    
+    description = "";
     return true;
   }
-  
+
   bool previousEntry()
   {
     return false;
@@ -169,7 +169,7 @@ public:
 
 SQLiteDictionary::SQLiteDictionary( const char *fileName ) : fileName( fileName ), _db( NULL )
 {
-    memset( statement, 0, sizeof(sqlite3_stmt*)*S_COUNT );
+  memset( statement, 0, sizeof(sqlite3_stmt*)*S_COUNT );
 }
 
 SQLiteDictionary::~SQLiteDictionary()
@@ -230,7 +230,7 @@ sqlite3_stmt *SQLiteDictionary::getStmt( StmtID stmt_id )
       return NULL;
     }
     return new_stmt;
-  }  
+  }
 }
 
 bool SQLiteDictionary::bind()
@@ -246,7 +246,6 @@ bool SQLiteDictionary::bind()
 
 //  sqlite3_exec( _db, "reindex bedic", NULL, NULL, NULL );
 
- 
   return true;
 }
 
@@ -264,7 +263,7 @@ const char database_schema[] =
 "  value varchar(1024000) );";
 
 DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *name, std::string &errorMessage )
-{ 
+{
   // Check if file exists, if it does - return an error
   {
     FILE *fh = fopen( fileName, "rb" );
@@ -289,7 +288,7 @@ DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *nam
 
   // initialize collation, so create table does not fail
   sqlite3_create_collation( db, "bedic", SQLITE_UTF8, NULL, compare_callback );
-  
+
   // create tables
   char *errmsg = NULL;
   rc = sqlite3_exec( db, database_schema, NULL, NULL, &errmsg );
@@ -310,7 +309,7 @@ DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *nam
 //     errorMessage = std::string("Can not open ") + templateFileName;
 //     return NULL;
 //   }
-  
+
 
 //   FILE *out = fopen( fileName, "wb" );
 //   if( out == NULL ) {
@@ -318,10 +317,10 @@ DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *nam
 //     errorMessage =  "Can not open dictionary file for writing" ;
 //     return NULL;
 //   }
-      
+
 //   const int bufSize = 1024;
 //   char buf[bufSize];
-    
+
 //   do {
 //     int read = fread( buf, sizeof( char ), bufSize, in );
 //     fwrite( buf, sizeof( char ), read, out );
@@ -339,8 +338,8 @@ DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *nam
     errorMessage = dic->getErrorMessage();
     delete dic;
     return NULL;
-   }
-  
+  }
+
   return dic;
 }
 
@@ -385,7 +384,7 @@ bool SQLiteDictionary::findNext( const char *keyword, std::string &next, bool or
     errorString = std::string(sqlite3_errmsg(db));
     sqlite3_reset( stmt );
     return false;
-  }    
+  }
   sqlite3_reset( stmt );
 
   return true;
@@ -404,7 +403,7 @@ DictionaryIteratorPtr SQLiteDictionary::end()
 {
   return DictionaryIteratorPtr( new SQLiteDictionaryIterator( this, (char *)(terminal_keyword) ) );  // FIXME do proper C++ cast
 }
-  
+
 DictionaryIteratorPtr SQLiteDictionary::findEntry( const char *keyword, bool &matches )
 {
   std::string result;
@@ -448,7 +447,7 @@ bool SQLiteDictionary::getProperty( const char *propertyName, std::string &prope
     propertyValue = (const char*)sqlite3_column_text( stmt, 0 );
   }
   sqlite3_reset( stmt );
-  
+
   return true;
 }
 
@@ -483,7 +482,7 @@ DictionaryIteratorPtr SQLiteDictionary::insertEntry( const char *keyword )
 
   sqlite3_stmt *stmt = getStmt( S_INSERT_ENTRY );
   if( stmt == NULL ) return DictionaryIteratorPtr(NULL);
-  
+
   sqlite3_bind_text( stmt, 1, keyword, strlen( keyword ), SQLITE_TRANSIENT );
   int create_time = (int)time( NULL );
   sqlite3_bind_int( stmt, 2, create_time );
@@ -501,13 +500,13 @@ bool SQLiteDictionary::updateEntry( const DictionaryIteratorPtr &entry, const ch
 {
   if( !entry.isValid() )
     return false;
-  
+
   sqlite3 *db = getDB();
   if( db == NULL ) return false;
 
   sqlite3_stmt *stmt = getStmt( S_UPDATE_ENTRY );
   if( stmt == NULL ) return false;
-  
+
   sqlite3_bind_text( stmt, 1, entry->getKeyword(), strlen( entry->getKeyword() ), SQLITE_TRANSIENT );
   sqlite3_bind_text( stmt, 2, description, strlen( description ), SQLITE_TRANSIENT );
   int modif_time = (int)time( NULL );
@@ -526,13 +525,13 @@ bool SQLiteDictionary::removeEntry( const DictionaryIteratorPtr &entry )
 {
   if( !entry.isValid() )
     return false;
-  
+
   sqlite3 *db = getDB();
   if( db == NULL ) return false;
 
   sqlite3_stmt *stmt = getStmt( S_REMOVE_ENTRY );
   if( stmt == NULL ) return false;
-  
+
   sqlite3_bind_text( stmt, 1, entry->getKeyword(), strlen( entry->getKeyword() ), SQLITE_TRANSIENT );
   if( sqlite3_step( stmt ) != SQLITE_DONE ) {
     errorString = std::string(sqlite3_errmsg(db));

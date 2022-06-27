@@ -6,7 +6,7 @@
  * Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
  * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
  *
- * This program is based on the kbedic dictionary by 
+ * This program is based on the kbedic dictionary by
  * Radostin Radnev <radnev@yahoo.com>.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,11 +30,10 @@
 #include <string>
 #include <vector>
 #include <map>
+
 #include "dictionary.h"
 #include "file.h"
 #include "shcm.h"
-
-using namespace std;
 
 /**
  * DictImpl class implements the abstract Dictionary class
@@ -52,7 +51,7 @@ using namespace std;
  *
  *	 Currently defined properties:
  *		- name			required
- *		  the name of the database (as will be 
+ *		  the name of the database (as will be
  * 		  shown to the user)
  *
  *		- search-ignore-chars	optional (default: empty)
@@ -73,11 +72,11 @@ using namespace std;
  *	 variable-size entries. Every entry defines
  *	 a single word and (all) its meanings.
  *	 The entries in the database are sorted. The
- *	 comparision while sorting ignores the character 
- * 	 case and the characters that should be ignored 
+ *	 comparision while sorting ignores the character
+ * 	 case and the characters that should be ignored
  * 	 (see search-ignore-chars)
  *
- *	 The entry contains two values: word and sense. 
+ *	 The entry contains two values: word and sense.
  *	 Both are variable-size, the delimiter between them
  *	 is an '\n' character.
  *
@@ -90,31 +89,32 @@ using namespace std;
 
 struct entry_type;
 
-typedef vector<unsigned short> CanonizedWord;
+typedef std::vector<unsigned short> CanonizedWord;
 
 class CollationComparator 
 {
 protected:
-  vector<string> ignoreChars;
-  map<int, int> charPrecedence; // To build lexical precedence
-  vector<int> precedenceGroups;
+  std::vector<std::string> ignoreChars;
+  std::map<int, int> charPrecedence; // To build lexical precedence
+  std::vector<int> precedenceGroups;
   bool useCharPrecedence;
   int charPrecedenceUnknown;
+
 public:
-  void setCollation( const string &collationDef, const string &ignoreChars  );
+  void setCollation( const std::string &collationDef, const std::string &ignoreChars  );
     
   /**
    * Compares two words
    *
-   * The words should be put in cannonical form 
+   * The words should be put in cannonical form
    * before this method is called
    */
   int compare(const CanonizedWord &s1, const CanonizedWord &s2);
 
   /**
-   * Puts a string in canonized form ready for 
+   * Puts a string in canonized form ready for
    * comparision.
-   * 
+   *
    * All the characters in the word are upper-cased.
    * All the characters that should be ignored are
    * removed.
@@ -123,14 +123,14 @@ public:
    *
    * @return cannonical form of the word
    */
-  CanonizedWord canonizeWord(const string& s);  
+  CanonizedWord canonizeWord(const std::string &s);
 };
 
 
 class DictImpl : public Dictionary, public CollationComparator {
 
   friend struct entry_type;
-  
+
 public:
 
   /**
@@ -142,7 +142,7 @@ public:
    * @param doCheckIntegrity if true, check integrity. Checking
    * integrity may be slow for large dictionaries.
    */
-  DictImpl(const char* filename, bool doCheckIntegrity );
+  DictImpl(const char *filename, bool doCheckIntegrity );
   virtual ~DictImpl();
 
   /**
@@ -151,13 +151,13 @@ public:
    * @return name of the dictionary as set in the 
    * dictionary properties header
    */
-  virtual const string& getName() const;
+  virtual const std::string &getName() const;
 
   /**
    * Returns file name of the dictionary file
    */
-  virtual const string& getFileName() const;
-  
+  virtual const std::string &getFileName() const;
+
   /**
    * Looks for a word in the dictionary
    *
@@ -179,7 +179,7 @@ public:
    *
    * @return true if exact match is found
    */
-  virtual bool findEntry(const string& word, bool& subword);
+  virtual bool findEntry(const std::string &word, bool &subword);
 
   /**
    * Moves the internal word pointer to the next word.
@@ -218,7 +218,7 @@ public:
    *
    * @return current word
    */
-  virtual const string& getWord() const;
+  virtual const std::string &getWord() const;
 
   /**
    * Returns the sense of the word pointer by the 
@@ -226,14 +226,14 @@ public:
    *
    * @return sense
    */
-  virtual const string& getSense() const;
+  virtual const std::string &getSense() const;
 
   /**
    * Returns error description or zero if no error 
    *
    * @return error description
    */
-  virtual const string& getError() const {
+  virtual const std::string &getError() const {
     return errorDescr; 
   }
 
@@ -243,10 +243,10 @@ public:
    *
    * @return property value
    */
-  virtual const string& getProperty( const char *name ) {
+  virtual const std::string &getProperty( const char *name ) {
     return properties[name];    
   }
-  
+
   /**
    * Check integrity of the dictionary file.
    *
@@ -272,7 +272,7 @@ protected:
   };
 
   // file descriptor to the dictionary file
-  File* fdata;
+  File *fdata;
 
   // position of the first entry
   long firstEntryPos;
@@ -281,22 +281,22 @@ protected:
   long lastEntryPos;
 
   // error description
-  string errorDescr;
+  std::string errorDescr;
 
   // properties (see the class overall documentation)
-  string name;
-  string fileName;
+  std::string name;
+  std::string fileName;
   int maxWordLength;
   int maxEntryLength;
 
   // general purpose buffer
-  char* buf;
+  char *buf;
 
   // current word
-  string currWord;
+  std::string currWord;
 
   // the sense of the current word
-  mutable string currSense;
+  mutable std::string currSense;
   mutable bool senseCompressed;
 
   // current position
@@ -304,18 +304,18 @@ protected:
 
   // next position, or -1 if not defined
   long nextPos;
-	
+
   // index table
-  vector<IndexEntry> index;
+  std::vector<IndexEntry> index;
 
   // property values
-  map<string, string> properties;
+  std::map<std::string, std::string> properties;
 
-  SHCM* compressor;
+  SHCM *compressor;
 
-  void setError(const string& err) {
+  void setError(const std::string &err) {
     errorDescr = err; 
-//		printf("Error: %s\n", (const char*) errorDescr.utf8());
+//  printf("Error: %s\n", (const char*) errorDescr.utf8());
   }
 
   /**
@@ -343,7 +343,7 @@ protected:
    *
    * @return next line
    */
-  int getLine(string&, int&);
+  int getLine(std::string &, int &);
 
   /**
    * Reads an entry starting from the specified position.
@@ -390,7 +390,7 @@ protected:
    * @return start position of an entry
    */
   long findNext(long pos);
-  
+
   /**
    * Index lookup
    *
@@ -401,7 +401,7 @@ protected:
    * @param b output param. sets the start of the region
    * @param e output param. sets the end of the region
    */
-  void bsearchIndex(const CanonizedWord& s, long& b, long& e);
+  void bsearchIndex(const CanonizedWord &s, long &b, long &e);
 
 
   // entry delimiter character
@@ -409,10 +409,10 @@ protected:
 
   // word delimiter character
   static const char WORD_DELIMITER;
-  
-public:  
-  static string escape(const string& s);
-  static string unescape(const string& s);
+
+public:
+  static std::string escape(const std::string &s);
+  static std::string unescape(const std::string &s);
 };
 
 extern unsigned char terminal_keyword[];

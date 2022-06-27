@@ -26,9 +26,9 @@
 #define _BEDIC_H
 
 #include <string.h>
+#include <stdio.h>
 
 #include <string>
-#include <stdio.h>
 
 class CollationComparator;
 
@@ -75,7 +75,7 @@ public:
       {
         return itsPtr != NULL;
       }
-    
+
     X& operator*()  const            {return *itsPtr;}
     X* operator->() const            {return itsPtr;}
     X* get()        const            {return itsPtr;}
@@ -90,9 +90,9 @@ class DictionaryIterator
 {
 public:
   virtual ~DictionaryIterator()
-    {
-    }
-  
+  {
+  }
+
   virtual const char *getKeyword() = 0;
   virtual const char *getDescription() = 0;
 
@@ -101,12 +101,12 @@ public:
 
   bool operator==( DictionaryIterator &x ) 
   {
-    return strcmp( getKeyword(), x.getKeyword() )==0;
+    return strcmp( getKeyword(), x.getKeyword() ) == 0;
   }
 
   bool operator!=( DictionaryIterator &x ) 
   {
-    return strcmp( getKeyword(), x.getKeyword() )!=0;
+    return strcmp( getKeyword(), x.getKeyword() ) != 0;
   }
   
 };
@@ -117,12 +117,12 @@ class StaticDictionary
 {
 public:
   virtual ~StaticDictionary()
-    {
-    }
-  
+  {
+  }
+
   virtual DictionaryIteratorPtr begin() = 0;
   virtual DictionaryIteratorPtr end() = 0;
-  
+
   virtual DictionaryIteratorPtr findEntry( const char *keyword, bool &matches ) = 0;
 
   virtual const char *getName() = 0;
@@ -133,32 +133,32 @@ public:
   virtual const char *getErrorMessage() = 0;
 
   virtual bool checkIntegrity()
-    {
-      return true;
-    }
+  {
+    return true;
+  }
 
   virtual CollationComparator* getCollationComparator()
-    {
-      return NULL;
-    }  
+  {
+    return NULL;
+  }  
   
   /**
    * Check if the dictionary can be casted to DynamicDictionary
    * interface (qtopia does not allow for RTT).
    */
   virtual bool isDynamic()
-    {
-      return false;
-    }
+  {
+    return false;
+  }
 
   /**
    * Check if the dictionary allows to edit its properties. Must be also
    * DynamicDictionary.
    */
   virtual bool isMetaEditable()
-    {
-      return false;
-    }
+  {
+    return false;
+  }
   
   // Static members
 
@@ -170,8 +170,8 @@ class DynamicDictionary: public StaticDictionary
 {
 public:
   virtual ~DynamicDictionary()
-    { 
-    }
+  { 
+  }
 
   virtual DictionaryIteratorPtr insertEntry( const char *keyword ) = 0;
   virtual bool updateEntry( const DictionaryIteratorPtr &entry, const char *description ) = 0;
@@ -180,16 +180,16 @@ public:
   virtual bool setProperty( const char *propertyName, const char *propertyValue ) = 0;
 
   virtual bool isDynamic()
-    {
-      return true;
-    }
+  {
+    return true;
+  }
   
 };
 
 DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *name, std::string &errorMessage );
 DynamicDictionary *createHybridDictionary( const char *fileName, StaticDictionary *static_dic,
   std::string &errorMessage );
-  
+
 std::string formatDicEntry( std::string entry );
 
 

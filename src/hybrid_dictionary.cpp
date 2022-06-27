@@ -39,7 +39,7 @@ class HybridDictionary: public DynamicDictionary
 
 protected:
   std::string errorString;
-  
+
   StaticDictionary *static_dic;
   DynamicDictionary *dynamic_dic;
 
@@ -48,10 +48,10 @@ protected:
 
 public:
   ~HybridDictionary();
-  
+
   virtual DictionaryIteratorPtr begin();
   virtual DictionaryIteratorPtr end();
-  
+
   virtual DictionaryIteratorPtr findEntry( const char *keyword, bool &matches );
 
   virtual const char *getName();
@@ -60,13 +60,13 @@ public:
   virtual bool getProperty( const char *propertyName, std::string &propertyValue );
   virtual bool setProperty( const char *propertyName, const char *propertyValue );
 
-  virtual const char *getErrorMessage();  
+  virtual const char *getErrorMessage();
 
   virtual bool isMetaEditable()
-    {
-      return false;
-    }
-  
+  {
+    return false;
+  }
+
   DictionaryIteratorPtr insertEntry( const char *keyword );
   bool updateEntry( const DictionaryIteratorPtr &entry, const char *description );
   bool removeEntry( const DictionaryIteratorPtr &entry );  
@@ -77,10 +77,10 @@ public:
 class HybridDictionaryIterator : public DictionaryIterator
 {
 //  HybridDictionary *dic;
-  
+
   DictionaryIterator *static_it, *dynamic_it;
   CollationComparator* cmp;
-  
+
 //  std::string keyword;
 
   enum { NoOrder = 0, StaticFirst, DynamicFirst, BothSame } order;
@@ -89,10 +89,10 @@ class HybridDictionaryIterator : public DictionaryIterator
   {
     switch( order ) {
     case NoOrder:
-    { 
+    {
 //      printf( "%s - %s\n", static_it->getKeyword(), dynamic_it->getKeyword() );
       CanonizedWord word_s = cmp->canonizeWord( static_it->getKeyword() );
-      CanonizedWord word_d = cmp->canonizeWord( dynamic_it->getKeyword() );      
+      CanonizedWord word_d = cmp->canonizeWord( dynamic_it->getKeyword() );
       int res = cmp->compare( word_s, word_d );
       if( res == 0 ) {
         order = BothSame;
@@ -112,39 +112,39 @@ class HybridDictionaryIterator : public DictionaryIterator
     case BothSame:
       return dynamic_it;
     } 
-    return static_it;    
+    return static_it;
   }
-  
+
 public:
   HybridDictionaryIterator( DictionaryIteratorPtr static_it, DictionaryIteratorPtr dynamic_it,
     CollationComparator* cmp ) :
     static_it( static_it.release() ), dynamic_it( dynamic_it.release() ), cmp( cmp ), order( NoOrder )
   {
   }
-  
+
   ~HybridDictionaryIterator()
-    {
-      delete static_it; 
-      delete dynamic_it;
-    }
-  
+  {
+    delete static_it; 
+    delete dynamic_it;
+  }
+
   const char *getKeyword()
   {
     return getFirstIterator()->getKeyword();
   }
-  
+
   virtual const char *getDescription()
   {
     return getFirstIterator()->getDescription();
   }
-  
+
   bool nextEntry()
   {
     DictionaryIterator *firstIt = getFirstIterator();
 
     bool res = firstIt->nextEntry();
     if( !res ) return false;
-    
+
     if( order == BothSame )
       res = static_it->nextEntry();
 
@@ -152,7 +152,7 @@ public:
     
     return res;
   }
-  
+
   bool previousEntry()
   {
     return false;
@@ -174,7 +174,7 @@ DictionaryIteratorPtr HybridDictionary::end()
                                   static_dic->end(), dynamic_dic->end(),
                                   dynamic_dic->getCollationComparator() ) );
 }
-  
+
 DictionaryIteratorPtr HybridDictionary::findEntry( const char *keyword, bool &matches )
 {
   bool matches_static, matches_dynamic;
@@ -211,11 +211,11 @@ DynamicDictionary *createHybridDictionary( const char *fileName, StaticDictionar
   DynamicDictionary *dynamic_dic = createSQLiteDictionary( fileName, static_dic->getName(), errorMessage );
   if( dynamic_dic == NULL )
     return NULL;
-  
+
   {
     string collation_def;
     bool success = static_dic->getProperty( "char-precedence", collation_def );
-  
+
     if( success ) {
       success = dynamic_dic->setProperty( "collation", collation_def.c_str() );
       if( !success ) {
@@ -225,12 +225,12 @@ DynamicDictionary *createHybridDictionary( const char *fileName, StaticDictionar
       }
     }
   }
-  
-  
+
+
   {
     string ignore_def;
     bool success = static_dic->getProperty( "search-ignore-chars", ignore_def );
-  
+
     if( success ) {
       if( ignore_def.empty() )
         ignore_def = "-.";
@@ -242,7 +242,7 @@ DynamicDictionary *createHybridDictionary( const char *fileName, StaticDictionar
       }
     }
   }
-  
+
 
 //   success = dynamic_dic->setProperty( "static-dic", static_dic->getFileName() );
 //   if( !success ) {
@@ -250,7 +250,7 @@ DynamicDictionary *createHybridDictionary( const char *fileName, StaticDictionar
 //     delete dynamic_dic;
 //     return NULL;
 //   }
-  
+
   return new HybridDictionary( static_dic, dynamic_dic );
 
 }
@@ -281,7 +281,7 @@ DynamicDictionary *loadHybridDictionary( const char *fileName, std::string &erro
 //     delete dynamic_dic;
 //     return NULL;
 //   }
-    
+
   StaticDictionary *static_dic = loadBedicDictionary( static_file_name.c_str(), false, errorMessage );
   if( static_dic == NULL ) {
     delete dynamic_dic;
@@ -325,7 +325,7 @@ const char *HybridDictionary::getErrorMessage()
 }
 
 // ============= Editing ==============
-  
+
 DictionaryIteratorPtr HybridDictionary::insertEntry( const char *keyword )
 {
   return dynamic_dic->insertEntry( keyword );
@@ -340,7 +340,7 @@ bool HybridDictionary::updateEntry( const DictionaryIteratorPtr &entry, const ch
     if( !placeHolder.isValid() )
       return false;
   }
-    
+
   return dynamic_dic->updateEntry( placeHolder, description );
 }
 
