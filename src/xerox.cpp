@@ -507,10 +507,10 @@ static void printHelp() {
  " [outfile]\nSee the man page for more information\n";
 }
 
-static void errorCheck( bool condition, char *string )
+static void errorCheck(bool condition, const char *description)
 {
-  if( !condition ) {
-    throw XeroxException( string );
+  if(!condition) {
+    throw XeroxException(description);
   }
 }
 
@@ -602,10 +602,10 @@ int main(int argc, char** argv) {
     
     return EXIT_SUCCESS;
   }
-  catch( QuietException  ex ) {
+  catch(QuietException  ex) {
     return EXIT_FAILURE;
   }
-  catch( XeroxException ex ) {
+  catch(XeroxException &ex) {
     std::cerr << PROG_NAME ": " << ex.what() << "\n";
   }
   

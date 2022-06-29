@@ -1,3 +1,10 @@
+/**
+ * @file   shc.c
+ * @brief
+ * @author Simakov Alexander, modified by Lyndon Hill
+ * @note   Original comment below documentation header
+ */
+
 /*
  *  shcodec ;) version 1.0.1 source code
  *  copyright (C) 1998-2002 Simakov Alexander
@@ -120,7 +127,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen) {
             last=first; dpth++;
             if(last<0) break;
         }
- 
+
         removed=last+1;
 
         if((freq[symb[0]]%n)>=removed) {
@@ -155,7 +162,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen) {
                 root=(first+root)>>1;
                 else first=(first+root)>>1;
             }
-   
+
             first=root;
         }
 
@@ -301,7 +308,8 @@ int sh_PackTree(uchar *len, uchar *symb, uchar *aux, uint32 *buf, int n) {
 }
 
 int sh_ExpandTree(uchar *len, uchar *symb, uint32 *buf) {
-    int curbits, curval, currun, lenbits, runbits, flag, bits, i, j, n;
+  /* Variable 'curbits' not used in this function, removed by Lyndon Hill */
+    int curval, currun, lenbits, runbits, flag, bits, i, j, n;
     uint32 bitbuf, lenmask, runmask;
 
     /* extract rle parameters */

@@ -99,14 +99,14 @@ public:
   virtual bool nextEntry() = 0;
   virtual bool previousEntry() = 0;
 
-  bool operator==( DictionaryIterator &x ) 
+  bool operator==(DictionaryIterator &x) 
   {
-    return strcmp( getKeyword(), x.getKeyword() ) == 0;
+    return strcmp(getKeyword(), x.getKeyword()) == 0;
   }
 
-  bool operator!=( DictionaryIterator &x ) 
+  bool operator!=(DictionaryIterator &x) 
   {
-    return strcmp( getKeyword(), x.getKeyword() ) != 0;
+    return strcmp(getKeyword(), x.getKeyword()) != 0;
   }
   
 };
@@ -123,12 +123,12 @@ public:
   virtual DictionaryIteratorPtr begin() = 0;
   virtual DictionaryIteratorPtr end() = 0;
 
-  virtual DictionaryIteratorPtr findEntry( const char *keyword, bool &matches ) = 0;
+  virtual DictionaryIteratorPtr findEntry(const char *keyword, bool &matches) = 0;
 
   virtual const char *getName() = 0;
   virtual const char *getFileName() = 0;
 
-  virtual bool getProperty( const char *propertyName, std::string &propertyValue ) = 0;
+  virtual bool getProperty(const char *propertyName, std::string &propertyValue) = 0;
 
   virtual const char *getErrorMessage() = 0;
 
@@ -137,9 +137,9 @@ public:
     return true;
   }
 
-  virtual CollationComparator* getCollationComparator()
+  virtual CollationComparator *getCollationComparator()
   {
-    return NULL;
+    return nullptr;
   }  
   
   /**
@@ -162,7 +162,8 @@ public:
   
   // Static members
 
-  static StaticDictionary *loadDictionary( const char* filename, bool doCheckIntegrity, std::string &errorMessage );
+  static StaticDictionary *loadDictionary(const char *filename, bool doCheckIntegrity,
+                                          std::string &errorMessage );
   
 };
 
@@ -170,14 +171,14 @@ class DynamicDictionary: public StaticDictionary
 {
 public:
   virtual ~DynamicDictionary()
-  { 
+  {
   }
 
-  virtual DictionaryIteratorPtr insertEntry( const char *keyword ) = 0;
-  virtual bool updateEntry( const DictionaryIteratorPtr &entry, const char *description ) = 0;
-  virtual bool removeEntry( const DictionaryIteratorPtr &entry ) = 0;  
+  virtual DictionaryIteratorPtr insertEntry(const char *keyword) = 0;
+  virtual bool updateEntry(const DictionaryIteratorPtr &entry, const char *description) = 0;
+  virtual bool removeEntry(const DictionaryIteratorPtr &entry) = 0;  
 
-  virtual bool setProperty( const char *propertyName, const char *propertyValue ) = 0;
+  virtual bool setProperty(const char *propertyName, const char *propertyValue) = 0;
 
   virtual bool isDynamic()
   {
@@ -186,12 +187,12 @@ public:
   
 };
 
-DynamicDictionary *createSQLiteDictionary( const char *fileName, const char *name, std::string &errorMessage );
-DynamicDictionary *createHybridDictionary( const char *fileName, StaticDictionary *static_dic,
-  std::string &errorMessage );
+DynamicDictionary *createSQLiteDictionary(const char *fileName, const char *name,
+                                          std::string &errorMessage );
+DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary *static_dic,
+                                          std::string &errorMessage);
 
-std::string formatDicEntry( std::string entry );
-
+std::string formatDicEntry(std::string entry);
 
 #endif  /* _BEDIC_H */
 

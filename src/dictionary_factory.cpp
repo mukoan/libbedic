@@ -1,6 +1,7 @@
 /**
  * @file   dictionary_factory.cpp
- * @brief  Create dynamic or static dictionary from a file. Recognize format.
+ * @brief  Load and create dynamic or static dictionary from a file.
+ *         Recognizes format based on file extension.
  * @author Lyndon Hill and others
  *
  * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
@@ -25,22 +26,28 @@
 #include <string.h>
 #include <stdio.h>
 
-StaticDictionary *loadBedicDictionary( const char* filename, bool doCheckIntegrity, std::string &errorMessage );
-DynamicDictionary *loadSQLiteDictionary( const char *fileName, std::string &errorMessage );
-DynamicDictionary *loadHybridDictionary( const char *fileName, std::string &errorMessage );
+StaticDictionary *loadBedicDictionary(const char *filename, bool doCheckIntegrity,
+                                      std::string &errorMessage);
+DynamicDictionary *loadSQLiteDictionary(const char *fileName, std::string &errorMessage);
+DynamicDictionary *loadHybridDictionary(const char *fileName, std::string &errorMessage);
 
 
-StaticDictionary *StaticDictionary::loadDictionary( const char* filename, bool doCheckIntegrity, std::string &errorMessage )
+StaticDictionary *StaticDictionary::loadDictionary(const char *filename,
+                                                   bool doCheckIntegrity,
+                                                   std::string &errorMessage)
 {
-  printf( "Loading dictionary: %s \n", filename );
-  if(strlen(filename)>5 && strcmp(&filename[strlen(filename) - 5], ".edic")==0) {
-    StaticDictionary *dic = loadSQLiteDictionary( filename, errorMessage );
+  printf("Loading dictionary: %s \n", filename);
+
+  if(strlen(filename) > 5 && strcmp(&filename[strlen(filename) - 5], ".edic") == 0) {
+    StaticDictionary *dic = loadSQLiteDictionary(filename, errorMessage);
     return dic;
-  } if(strlen(filename)>5 && strcmp(&filename[strlen(filename) - 5], ".hdic")==0) {
-    DynamicDictionary *dic = loadHybridDictionary( filename, errorMessage );
+  }
+
+  if(strlen(filename) > 5 && strcmp(&filename[strlen(filename) - 5], ".hdic") == 0) {
+    DynamicDictionary *dic = loadHybridDictionary(filename, errorMessage);
     return dic;
   } else {
-    return loadBedicDictionary( filename, doCheckIntegrity, errorMessage );
+    return loadBedicDictionary(filename, doCheckIntegrity, errorMessage);
   }
 }
 

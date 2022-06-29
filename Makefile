@@ -16,7 +16,7 @@ else
     CC=gcc
     CXX=g++
     LD=g++
-    ARCH_CXXFLAGS=-O2 -DARCH_X86
+    ARCH_CXXFLAGS=-std=c++11 -O2 -DARCH_X86
     DEBUG=1
 endif
 

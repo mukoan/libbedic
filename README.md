@@ -32,6 +32,8 @@ of this code should be considered GPL v2 unless individual files state otherwise
 
 # Changelog
 
+29.06.2022  Removing compiler warnings and reformatting code
+28.06.2022  Test unit for DynamicDictionary built and working. Reformatting code
 24.06.2022  First pass of fixing compilation errors, successfully built all objects
 23.06.2022  Reviewed test_dynamic_dictionary and first pass of mkbedic
 21.06.2022  Start of this new fork to make a publicly releaseable version

@@ -43,44 +43,44 @@
  *    The database has two parts: header and data.
  *
  *    1. Header
- *    	 The header contains a collection of property values.
- *	 All data in the header is encoded using UTF-8.
+ *       The header contains a collection of property values.
+ *   All data in the header is encoded using UTF-8.
  *
- *	 The format of a line of the header is:
- *	 	<name> '=' <value>
+ *   The format of a line of the header is:
+ *     <name> '=' <value>
  *
- *	 Currently defined properties:
- *		- name			required
- *		  the name of the database (as will be
- * 		  shown to the user)
+ *   Currently defined properties:
+ *    - name      required
+ *      the name of the database (as will be
+ *       shown to the user)
  *
- *		- search-ignore-chars	optional (default: empty)
- *		  list of the characters that will be 
- *		  ignored while doing search
+ *    - search-ignore-chars  optional (default: empty)
+ *      list of the characters that will be 
+ *      ignored while doing search
  *
- * 		- max-word-length	optional (default: 50)
- *		  Maximum length of the word entry
+ *     - max-word-length  optional (default: 50)
+ *      Maximum length of the word entry
  *
- *		- max-entry-length	optional (default: 8192)
- *		  maximum length of database entry
+ *    - max-entry-length  optional (default: 8192)
+ *      maximum length of database entry
  *
- *	 The header ends with '\0' character.
+ *   The header ends with '\0' character.
  *
  *    2. Data
  *
- *	 The data section of the dictionary contains
- *	 variable-size entries. Every entry defines
- *	 a single word and (all) its meanings.
- *	 The entries in the database are sorted. The
- *	 comparision while sorting ignores the character
- * 	 case and the characters that should be ignored
- * 	 (see search-ignore-chars)
+ *   The data section of the dictionary contains
+ *   variable-size entries. Every entry defines
+ *   a single word and (all) its meanings.
+ *   The entries in the database are sorted. The
+ *   comparision while sorting ignores the character
+ *    case and the characters that should be ignored
+ *    (see search-ignore-chars)
  *
- *	 The entry contains two values: word and sense.
- *	 Both are variable-size, the delimiter between them
- *	 is an '\n' character.
+ *   The entry contains two values: word and sense.
+ *   Both are variable-size, the delimiter between them
+ *   is an '\n' character.
  *
- *	 The entry ends with '\0' character.
+ *   The entry ends with '\0' character.
  *
  * The class uses binary search to find a word.
  * It creates an index to improve the searches.
@@ -101,8 +101,8 @@ protected:
   int charPrecedenceUnknown;
 
 public:
-  void setCollation( const std::string &collationDef, const std::string &ignoreChars  );
-    
+  void setCollation(const std::string &collationDef, const std::string &ignoreChars);
+
   /**
    * Compares two words
    *
@@ -127,8 +127,8 @@ public:
 };
 
 
-class DictImpl : public Dictionary, public CollationComparator {
-
+class DictImpl : public Dictionary, public CollationComparator
+{
   friend struct entry_type;
 
 public:
@@ -142,7 +142,7 @@ public:
    * @param doCheckIntegrity if true, check integrity. Checking
    * integrity may be slow for large dictionaries.
    */
-  DictImpl(const char *filename, bool doCheckIntegrity );
+  DictImpl(const char *filename, bool doCheckIntegrity);
   virtual ~DictImpl();
 
   /**
@@ -244,7 +244,7 @@ public:
    * @return property value
    */
   virtual const std::string &getProperty( const char *name ) {
-    return properties[name];    
+    return properties[name];
   }
 
   /**
@@ -263,7 +263,8 @@ protected:
    * It contains canonized word value and the position
    * of that value
    */
-  struct IndexEntry {
+  struct IndexEntry
+  {
     CanonizedWord word;
     long pos;
 
@@ -322,8 +323,8 @@ protected:
    * Reads the properties of the dictionary.
    *
    * The file pointer should point to the start of the file
-   * If the execution was successful, on return the file 
-   * pointer points to the first character after '\0' 
+   * If the execution was successful, on return the file
+   * pointer points to the first character after '\0'
    * end-of-header marker. If error occured, the file pointer
    * position is undefined.
    *
@@ -349,7 +350,7 @@ protected:
    * Reads an entry starting from the specified position.
    *
    * Updates currWord, currSense, currPos and nextPos fields.
-   * 
+   *
    * The method expects that pos points to the start of an
    * entry. If not, the results are undefined.
    *
@@ -364,9 +365,9 @@ protected:
    *
    * There are no restrictions for the value of the pos
    * parameter. If the value is less than the position of
-   * the first entry, the position of the first entry is 
+   * the first entry, the position of the first entry is
    * returned. If the value is greater than the position of
-   * the last entry, the position of the last entry is 
+   * the last entry, the position of the last entry is
    * returned.
    *
    * @param position to start scaning backward from
@@ -380,9 +381,9 @@ protected:
    *
    * There are no restrictions for the value of the pos
    * parameter. If the value is less than the position of
-   * the first entry, the position of the first entry is 
+   * the first entry, the position of the first entry is
    * returned. If the value is greater than the position of
-   * the last entry, the position of the last entry is 
+   * the last entry, the position of the last entry is
    * returned.
    *
    * @param position

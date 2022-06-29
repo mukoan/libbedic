@@ -30,17 +30,17 @@ using namespace std;
 
 class SHCM {
 public:
-  virtual void startDecode(const string& tree) = 0;
+  virtual void startDecode(const std::string &tree) = 0;
   virtual void endDecode() = 0;
 
   virtual void startPreEncode() = 0;
-  virtual string endPreEncode() = 0;
+  virtual std::string endPreEncode() = 0;
 
-  virtual void preencode(const string& s) = 0;
-  virtual string encode(const string& s) = 0;
-  virtual string decode(const string& s) = 0;
+  virtual void preencode(const std::string &s) = 0;
+  virtual std::string encode(const std::string &s) = 0;
+  virtual std::string decode(const std::string &s) = 0;
 
-  static SHCM* create();
+  static SHCM *create();
 };
 
 #endif  /* SHCM_H */

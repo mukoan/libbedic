@@ -1,3 +1,12 @@
+/**
+ * @file   shc.h
+ * @brief
+ * @author Simakov Alexander, modified by Lyndon Hill
+ * @note   Original comment below documentation header.
+ *         This header written by Lyndon Hill.
+ *         Documentation for each function has been moved in front of the function.
+ */
+
 /*
  *  shcodec ;) version 1.0.1 header file
  *  copyright (C) 1998-2002 Simakov Alexander
@@ -13,6 +22,8 @@
  *  e-mail: xander@online.ru
  */
 
+/* Next line added by Lyndon Hill */
+#pragma once
 #ifndef SHC_INCLUDED
 #define SHC_INCLUDED
 
@@ -27,16 +38,13 @@ extern "C" {
 #define SH_CACHEBITS (8)
 #define SH_CACHESIZE (1<<SH_CACHEBITS)
 
-int sh_SortFreq(uint32 *freq, uchar *symb);
-
 /*  Function: sh_SortFreq()
  *  Purpose: sort symbols by frequency
  *  Parameters: freq - symbol frequencies, symb - space for symbols
  *  Return: number of actual symbols, symb - sorted symbols
  *  Notes: none
  */
-
-void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen);
+int sh_SortFreq(uint32 *freq, uchar *symb);
 
 /*  Function: sh_CalcLen()
  *  Purpose: calculate code lengths
@@ -47,8 +55,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen);
  *  Return: len - code lengths
  *  Notes: len can be overlayed on (uchar *)freq
  */
-
- void sh_SortLen(uchar *len, uchar *symb, int n); 
+void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen);
 
 /*  Function: sh_SortLen()
  *  Purpose: sort symbols by code length and actual value
@@ -57,8 +64,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen);
  *  Return: symb - sorted symbols
  *  Notes: none
  */
-
-void sh_CalcCode(uchar *len, uchar *symb, uchar *code, int n);
+void sh_SortLen(uchar *len, uchar *symb, int n); 
 
 /*  Function: sh_CalcCode()
  *  Purpose: calculate canonical huffman codes
@@ -67,8 +73,7 @@ void sh_CalcCode(uchar *len, uchar *symb, uchar *code, int n);
  *  Return: code - symbol codes
  *  Notes: code can be overlayed on (uchar *)freq+256
  */
-
-int sh_PackTree(uchar *len, uchar *symb, uchar *aux, uint32 *buf, int n);
+void sh_CalcCode(uchar *len, uchar *symb, uchar *code, int n);
 
 /*  Function: sh_PackTree()
  *  Purpose: pack code tree
@@ -78,8 +83,7 @@ int sh_PackTree(uchar *len, uchar *symb, uchar *aux, uint32 *buf, int n);
  *  Return: packed tree size
  *  Notes: aux can be overlayed on (uchar *)freq+512
  */
-
-int sh_ExpandTree(uchar *len, uchar *symb, uint32 *buf);
+int sh_PackTree(uchar *len, uchar *symb, uchar *aux, uint32 *buf, int n);
 
 /*  Function: sh_ExpandTree()
  *  Purpose: expand code tree
@@ -88,8 +92,7 @@ int sh_ExpandTree(uchar *len, uchar *symb, uint32 *buf);
  *  Return: number of actual symbols
  *  Notes: none
  */
-
-void sh_CalcDecode(uchar *len, uchar *symb, uchar *base, uchar *offs, uchar *cache, int n);
+int sh_ExpandTree(uchar *len, uchar *symb, uint32 *buf);
 
 /*  Function: sh_CalcDecode()
  *  Purpose: calculate decode tables
@@ -99,6 +102,8 @@ void sh_CalcDecode(uchar *len, uchar *symb, uchar *base, uchar *offs, uchar *cac
  *  Return: base, offs and cache - ready for decoding
  *  Notes: cache can be overlayed on (uchar *)len
  */
+void sh_CalcDecode(uchar *len, uchar *symb, uchar *base, uchar *offs, uchar *cache, int n);
+
 
 /*  Macros: ENCODE_SYMB()
  *  Purpose: encode a symbol

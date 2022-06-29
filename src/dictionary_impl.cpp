@@ -53,13 +53,15 @@ unsigned char terminal_keyword[] = { 0xc2, 0xb6 };
  * Dictionary class implementation
  *
  **************************************************************************/
-Dictionary* Dictionary::create(const char* filename, bool doCheckIntegrity) {
+Dictionary* Dictionary::create(const char* filename, bool doCheckIntegrity)
+{
   DictImpl* dict = new DictImpl(filename, doCheckIntegrity);
 
   return dict;
 }
 
-Dictionary::~Dictionary() {
+Dictionary::~Dictionary()
+{
 }
 
 /***************************************************************************
@@ -71,21 +73,22 @@ Dictionary::~Dictionary() {
 const char DictImpl::DATA_DELIMITER = '\x00';
 const char DictImpl::WORD_DELIMITER = '\n';
 
-DictImpl::DictImpl(const char* filename, bool doCheckIntegrity ): buf(NULL)
+DictImpl::DictImpl(const char *filename, bool doCheckIntegrity): buf(nullptr)
 {
   fileName = filename;
 
   compressor = 0;
 
-  if (strlen(filename)>3 && 
-    strcmp(&filename[strlen(filename) - 3], ".dz")==0) {
-
+  if(strlen(filename) > 3 && strcmp(&filename[strlen(filename) - 3], ".dz") == 0)
+  {
     fdata = new DZFile();
-  } else {
+  }
+  else
+  {
     fdata = new File();
   }
 
-  if (fdata->open(filename) < 0) {
+  if(fdata->open(filename) < 0) {
     setError(strerror(errno));
     return;
   }
@@ -98,12 +101,12 @@ DictImpl::DictImpl(const char* filename, bool doCheckIntegrity ): buf(NULL)
   // In case the file ends with 0x00 0x10
   {
     char lastBytes[2] =
-      {
-        1, 1
-      };
+    {
+      1, 1
+    };
     fdata->read(fdata->size() - 2, (char*)&lastBytes, 2);
 
-    if( lastBytes[0]==DATA_DELIMITER && lastBytes[1]==10 ) {
+    if(lastBytes[0]==DATA_DELIMITER && lastBytes[1] == 10) {
 //      fprintf( stderr, "ends with EOL; la: %d\n", lastEntryPos );
       lastEntryPos = findPrev(lastEntryPos-2);
 //      fprintf( stderr, "la: %d\n", lastEntryPos );
@@ -118,27 +121,29 @@ DictImpl::DictImpl(const char* filename, bool doCheckIntegrity ): buf(NULL)
   buf = new char[maxEntryLength];
 
   // fix the indices
-  for(vector<IndexEntry>::iterator it = index.begin(); it != index.end(); ++it) {
+  for(std::vector<IndexEntry>::iterator it = index.begin(); it != index.end(); ++it) {
     (*it).pos += firstEntryPos;
   }
 
   // check the integrity
-  if (doCheckIntegrity) {
+  if(doCheckIntegrity) {
     checkIntegrity();
   }
 
   nextPos = -1;
 }
 
-DictImpl::~DictImpl() {
-  if (buf) {
+DictImpl::~DictImpl()
+{
+  if(buf) {
     delete []buf;
   }
 
   delete fdata;
 }
 
-const string& DictImpl::getName() const {
+const string& DictImpl::getName() const
+{
   return name;
 }
 
@@ -148,7 +153,8 @@ const string& DictImpl::getFileName() const
 }
 
 
-bool DictImpl::findEntry(const string& w, bool& subword) {
+bool DictImpl::findEntry(const string& w, bool& subword)
+{
   long b, e, m;
   bool found;
   CanonizedWord cw;
@@ -158,50 +164,61 @@ bool DictImpl::findEntry(const string& w, bool& subword) {
 
   CanonizedWord word = canonizeWord(w);
 
-//	struct timeval tv;
-//	gettimeofday(&tv, NULL);
-//	fprintf(stderr, "findEntry: > %s %015ld %015ld\n", word.c_str(), tv.tv_sec, tv.tv_usec);
+//  struct timeval tv;
+//  gettimeofday(&tv, NULL);
+//  fprintf(stderr, "findEntry: > %s %015ld %015ld\n", word.c_str(), tv.tv_sec, tv.tv_usec);
 
-  //First search the index
+  // First search the index
   bsearchIndex(word, b, e);
-//	printf("findEntry: b=%ld, e=%ld\n", b, e);
+//  printf("findEntry: b=%ld, e=%ld\n", b, e);
 
   // If index is dense, no need to search further
-  if ( b>=e ) {
+  if(b >= e)
+  {
     readEntry(b);
     cw = canonizeWord(currWord);
     found = compare(word, cw) == 0;
-  } else {
+  }
+  else
+  {
     found = false;
   }
 
   // Binary search on dictionary
-  while (b < e) {
+  while(b < e)
+  {
     // operation on unsiged numbers to save one more bit
     m = (long)(((unsigned long)b+(unsigned long)e)/2);
     m = findPrev(m);
-    if ((m < 0) || !readEntry(m)) {
-      currWord=string();
-      currSense=string();
-      senseCompressed=false;
-      currPos=firstEntryPos;
+    if((m < 0) || !readEntry(m))
+    {
+      currWord  = string();
+      currSense = string();
+      senseCompressed = false;
+      currPos = firstEntryPos;
       return false;
     }
 
     cw = canonizeWord(currWord);
-//		printf("findEntry: compare %s:%s\n", word.c_str(), cw.c_str());
+//  printf("findEntry: compare %s:%s\n", word.c_str(), cw.c_str());
     int cmp = compare(word, cw);
-    if (cmp == 0) {
+    if(cmp == 0)
+    {
       found = true;
       break;
-    } else if (cmp < 0) {
+    }
+    else if(cmp < 0)
+    {
       e = currPos;
-    } else {
+    }
+    else
+    {
       b = findNext(m+1);
     }
   }
 
-  if (!found) {           // findNext(m+1) can move position to the matching word
+  if(!found)
+  {           // findNext(m+1) can move position to the matching word
     readEntry(b);
     cw = canonizeWord(currWord);
     int cmp = compare(word, cw);
@@ -216,54 +233,59 @@ bool DictImpl::findEntry(const string& w, bool& subword) {
   }
 
   subword = false; //TODO: fix it: cw.substr(0, word.size()) == word;
-//	printf("findEntry: meaning=%s\n", currSense.c_str());
+// printf("findEntry: meaning=%s\n", currSense.c_str());
 
-//	gettimeofday(&tv, NULL);
-//	fprintf(stderr, "findEntry: < %015ld %015ld\n", tv.tv_sec, tv.tv_usec);
+// gettimeofday(&tv, NULL);
+// fprintf(stderr, "findEntry: < %015ld %015ld\n", tv.tv_sec, tv.tv_usec);
   return found;
 }
 
-bool DictImpl::nextEntry() {
+bool DictImpl::nextEntry()
+{
   long pos;
 
-  if (nextPos > 0) {
+  if(nextPos > 0) {
     pos = nextPos;
   } else {
     pos = findNext(currPos+1);
   }
 
-  if (pos > lastEntryPos) {
+  if(pos > lastEntryPos) {
     pos = lastEntryPos;
   }
 
-  if (pos == currPos) {
+  if(pos == currPos) {
     return false;
   }
 
   return readEntry(pos);
 }
 
-bool DictImpl::firstEntry() {
+bool DictImpl::firstEntry()
+{
   return readEntry(firstEntryPos);
 }
 
-bool DictImpl::lastEntry() {
+bool DictImpl::lastEntry()
+{
   return readEntry(lastEntryPos);
 }
 
-bool DictImpl::randomEntry() {
-
+bool DictImpl::randomEntry()
+{
   return readEntry(findNext(firstEntryPos + (long)
                      ((((double) lastEntryPos) * rand()) /
                        (RAND_MAX + (double) firstEntryPos))));
 }
 
-const string& DictImpl::getWord() const {
+const std::string &DictImpl::getWord() const
+{
   return currWord;
 }
 
-const string& DictImpl::getSense() const {
-  if (senseCompressed) {
+const std::string &DictImpl::getSense() const
+{
+  if(senseCompressed) {
     currSense = unescape(currSense);
     currSense = compressor->decode(currSense);
     senseCompressed = false;
@@ -272,25 +294,26 @@ const string& DictImpl::getSense() const {
   return currSense;
 }
 
-void DictImpl::bsearchIndex(const CanonizedWord &s, long& b, long& e) {
+void DictImpl::bsearchIndex(const CanonizedWord &s, long &b, long &e)
+{
   int ib, ie, m;
 
   ib = m = 0;
   ie = index.size() - 1;
 
-  if (ib >= ie) {
+  if(ib >= ie) {
     return;
   }
 
-  while (ib < ie) {
+  while(ib < ie) {
     m = (ib+ie) / 2;
     int cmp = compare(s, index[m].word);
-//		printf("bsearchIndex: compare %s:%s\n", (const char*) s.utf8(),
-//			(const char*) index[m]->word.utf8());
+//  printf("bsearchIndex: compare %s:%s\n", (const char*) s.utf8(),
+//         (const char*) index[m]->word.utf8());
 
-    if (cmp == 0) {
+    if(cmp == 0) {
       break;
-    } else if (cmp < 0) {
+    } else if(cmp < 0) {
       ie = m;
     } else {
       ib = m+1;
@@ -299,20 +322,20 @@ void DictImpl::bsearchIndex(const CanonizedWord &s, long& b, long& e) {
   }
 
 // Can not happen
-  if ((int)index.size() <= m) {
-    assert( 0 );
+  if((int)index.size() <= m) {
+    assert(0);
           
-// 		b = lastEntryPos;
-// 		e = lastEntryPos;
+//  b = lastEntryPos;
+//  e = lastEntryPos;
   } else {
-//		printf("bsearchIndex: compare %s:%s\n", (const char*) s.utf8(), 
-//			(const char*) index[m]->word.utf8());
-    if (compare(s, index[m].word) < 0 && m > 0) {
+//  printf("bsearchIndex: compare %s:%s\n", (const char *) s.utf8(), 
+//         (const char *) index[m]->word.utf8());
+    if(compare(s, index[m].word) < 0 && m > 0) {
       m--;
     }
 
     b = index[m].pos;
-    if ((m+1) < (int) index.size()) {
+    if((m+1) < (int) index.size()) {
       e = index[m+1].pos;
     } else {
       e = lastEntryPos;
@@ -320,47 +343,48 @@ void DictImpl::bsearchIndex(const CanonizedWord &s, long& b, long& e) {
   }
 }
 
-bool DictImpl::readEntry(long pos) {
+bool DictImpl::readEntry(long pos)
+{
   int clen = maxEntryLength / 4;
   int n = 0;
 
   // find the start position of the entry
-  if (pos > lastEntryPos) {
+  if(pos > lastEntryPos) {
     pos = lastEntryPos;
   } 
 
   currPos = pos;
   nextPos = -1;
-  char* pp = 0;
+  char *pp = 0;
 
   // read the entry
-  while (n < maxEntryLength) {
-    if (n+clen > maxEntryLength) {
+  while(n < maxEntryLength) {
+    if(n+clen > maxEntryLength) {
       clen = maxEntryLength - n;
     }
 
     int i = fdata->read(currPos + n, &buf[n], clen);
-    if (i < 0) {
+    if(i < 0) {
       setError(strerror(errno));
       return false;
-    } else if (i == 0) {
+    } else if(i == 0) {
       break;
     }
 
     pp = (char *) memchr(&buf[n], DATA_DELIMITER, i);
-    if (pp != 0) {
+    if(pp != 0) {
       break;
     }
     n += i;
   }
 
-  if (pp == 0) {
+  if(pp == 0) {
     setError("entry too long");
     return false;
   }
 
-  char* p = (char *) memchr(buf, WORD_DELIMITER, pp-buf);
-  if (p == 0) {
+  char *p = (char *) memchr(buf, WORD_DELIMITER, pp-buf);
+  if(p == 0) {
     stringstream s;
     s << "readEntry: invalid entry format. Entry content: '"
       << buf
@@ -370,58 +394,58 @@ bool DictImpl::readEntry(long pos) {
   }
   *p = '\0';
   currWord = string(buf);
-  if (compressor != 0) {
+  if(compressor != 0) {
     currWord = unescape(currWord);
     currWord = compressor->decode(currWord);
   }
-
 
   *pp = '\0';
   nextPos = currPos + (pp-buf) + 1;
 
   currSense=string(p+1);
   senseCompressed=false;
-  if (compressor != 0) {
+  if(compressor != 0) {
     senseCompressed=true;
-//		currSense = unescape(currSense);
-//		currSense = compressor->decode(currSense);
+//  currSense = unescape(currSense);
+//  currSense = compressor->decode(currSense);
   }
 
-//	printf("readEntry: currPos=%ld, nextPos=%ld, currSense=%s, currWord=%s\n",
-//		currPos, nextPos, currSense.c_str(), currWord.c_str());
+//  printf("readEntry: currPos=%ld, nextPos=%ld, currSense=%s, currWord=%s\n",
+//         currPos, nextPos, currSense.c_str(), currWord.c_str());
 
-//	printf(">>> %s\n", currWord.c_str());
+// printf(">>> %s\n", currWord.c_str());
 
   return true;
 }
 
-long DictImpl::findPrev(long pos) {
+long DictImpl::findPrev(long pos)
+{
   char s[256];
 
-  if (pos < firstEntryPos) {
+  if(pos < firstEntryPos) {
     return firstEntryPos;
   }
 
-  if (pos > lastEntryPos) {
+  if(pos > lastEntryPos) {
     return lastEntryPos;
   }
 
   long n = pos;
 
-  while (n > firstEntryPos) {
+  while(n > firstEntryPos) {
     int len = sizeof(s);
-    if ((n-len) < firstEntryPos) {
+    if((n-len) < firstEntryPos) {
       len = n - firstEntryPos + 1;
     }
 
     int k = fdata->read(n - len + 1, s, len);
-    if (k != len) {
+    if(k != len) {
       setError(strerror(errno));
       return -1;
     }
 
     for(int i = len - 1; i >= 0; i--) {
-      if (s[i] == DATA_DELIMITER) {
+      if(s[i] == DATA_DELIMITER) {
         return (n-len) + i + 2;
       }
     }
@@ -432,32 +456,33 @@ long DictImpl::findPrev(long pos) {
   return firstEntryPos;
 }
 
-long DictImpl::findNext(long pos) {
+long DictImpl::findNext(long pos)
+{
   char s[256];
 
-  if (pos < firstEntryPos) {
+  if(pos < firstEntryPos) {
     return firstEntryPos;
   }
 
-  if (pos > lastEntryPos) {
+  if(pos > lastEntryPos) {
     return lastEntryPos;
   }
 
-  while (1) {
+  while(1) {
     int n = fdata->read(pos, s, sizeof(s));
 
-    if (n < 0) {
+    if(n < 0) {
       setError(strerror(errno));
       return false;
     }
 
-    if (n == 0) {
+    if(n == 0) {
       setError("internal error");
       return -1;
     }
 
-    char* p = (char *) memchr(s, DATA_DELIMITER, n);
-    if (p != 0) {
+    char *p = (char *) memchr(s, DATA_DELIMITER, n);
+    if(p != 0) {
       pos += (p - s) + 1;
       break;
     }
@@ -470,25 +495,26 @@ long DictImpl::findNext(long pos) {
 
 
 
-int DictImpl::readProperties() {
+int DictImpl::readProperties()
+{
   properties.clear();
   int pos = 0;
 
-  while (1) {
-    string line;
+  while(1) {
+    std::string line;
 
     int lineSize = getLine(line, pos);
-    if( lineSize <= 0 || line[0] == DATA_DELIMITER ) {
+    if(lineSize <= 0 || line[0] == DATA_DELIMITER) {
       break;
     }
 
     int n = line.find('=');
-    if (n < 0) {
+    if(n < 0) {
       continue;
     }
 
-    string name = unescape(line.substr(0, n));
-    string value = unescape(line.substr(n+1));
+    std::string name = unescape(line.substr(0, n));
+    std::string value = unescape(line.substr(n+1));
     properties[name] = value;
   }
 
@@ -496,25 +522,25 @@ int DictImpl::readProperties() {
   name = properties["id"];
   
   // get the character precedence used for searching and sorting
-  string precedence = properties["char-precedence"];
+  std::string precedence = properties["char-precedence"];
   
   // get the chars that are ignored while searching
-  string ic = properties["search-ignore-chars"];  
+  std::string ic = properties["search-ignore-chars"];  
 
-  if (ic.size() == 0) {
+  if(ic.size() == 0) {
     ic = !precedence.empty() ? "" : "-.";
     properties["search-ignore-chars"] = ic;
   }
 
-  setCollation( precedence, ic );
+  setCollation(precedence, ic);
         
   // get the maximum length of a word
   maxWordLength = 50;
   string ns = properties["max-word-length"];
-  if (ns.size() != 0) {
+  if(ns.size() != 0) {
     char* eptr;
     int n = strtol(ns.c_str(), &eptr, 0);
-    if (*eptr == '\0') {
+    if(*eptr == '\0') {
       maxWordLength = n + 5;
     }
   }
@@ -523,24 +549,24 @@ int DictImpl::readProperties() {
   // (word and sense including)
   maxEntryLength = 16384;
   ns = properties["max-entry-length"];
-  if (ns.size() != 0) {
+  if(ns.size() != 0) {
     char* eptr;
     int n = strtol(ns.c_str(), &eptr, 0);
-    if (*eptr == '\0') {
+    if(*eptr == '\0') {
       maxEntryLength = n + 10;
     }
   }
 
   // read compression method
   ns = properties["compression-method"];
-  if (ns.size() == 0) {
+  if(ns.size() == 0) {
     ns = "none";
   }
 
-  if (ns == "shcm") {
+  if(ns == "shcm") {
     compressor = SHCM::create();
     ns = properties["shcm-tree"];
-    if (ns.size() == 0) {
+    if(ns.size() == 0) {
       setError("no shcm tree");
       return 0;
     }
@@ -554,13 +580,13 @@ int DictImpl::readProperties() {
 
   // read the index
   ns = properties["index"];
-//	printf("index=%s\n", ns.c_str() + 1);
+// printf("index=%s\n", ns.c_str() + 1);
 
   int i, n;
   n = 0;
   do {
     i = ns.find((char) 0, n+1);
-    if (i < 0) {
+    if(i < 0) {
       i = ns.size();
     }
 
@@ -568,21 +594,21 @@ int DictImpl::readProperties() {
       break;
     }
 
-    string idx(ns, n+1, i-n);
+    std::string idx(ns, n+1, i-n);
     int k = idx.find('\n');
-    string word(idx, 0, k);
-    string pos(idx, k+1);
+    std::string word(idx, 0, k);
+    std::string pos(idx, k+1);
     char* eptr;
 
     long l = strtol(pos.c_str(), &eptr, 0);
-    if (*eptr != '\0') {
-//			printf("error\n");
+    if(*eptr != '\0') {
+//  printf("error\n");
       index.clear();
       break;
     }
 
     index.push_back(IndexEntry(canonizeWord(word), l));
-//		printf("%s:%ld\n", word.c_str(), l);
+//  printf("%s:%ld\n", word.c_str(), l);
 
     n = i;
   } while (n < (int) ns.size());
@@ -591,14 +617,15 @@ int DictImpl::readProperties() {
   return pos;
 }
 
-int DictImpl::getLine(string& line, int& pos) {
+int DictImpl::getLine(std::string &line, int &pos)
+{
   char buf[90];
   int i, n;
   int p;
 
   line.erase();
   p = pos;
-  while (1) {
+  while(1) {
     n = fdata->read(p, buf, sizeof(buf));
     if (n < 0) {
       return 0;
@@ -607,18 +634,18 @@ int DictImpl::getLine(string& line, int& pos) {
     }
 
     for(i = 0; i < n; i++) {
-      if (buf[i] == 0) {
+      if(buf[i] == 0) {
         pos += line.size() + i + 1;
         return 0;
       }
 
-      if (buf[i] == '\n') {
+      if(buf[i] == '\n') {
         break;
       }
     }
 
     line.append(buf, i);
-    if (i < n) {
+    if(i < n) {
       break;
     }
 
@@ -635,19 +662,19 @@ bool DictImpl::checkIntegrity() {
   // the last two characters are 0 and 10. This is because most
   // of the text editors insert EOL at the end of the file
   char lastBytes[2] = 
-    {
-      1, 1
-    };
+  {
+    1, 1
+  };
   fdata->read(fdata->size() - 2, (char*)&lastBytes, 2);
 
-  if( lastBytes[1] != 0 && (lastBytes[0]!=0 || lastBytes[1]!=10)) {
+  if(lastBytes[1] != 0 && (lastBytes[0] !=0 || lastBytes[1] != 10)) {
     setError("Integrity failure");
     return false;
   }
 
   // check the file size (if specified in the header)
-/*	string s = properties["dict-size"];
-	if (s.size() != 0) {
+/*  string s = properties["dict-size"];
+  if (s.size() != 0) {
         const char* ss = s.c_str();
         char* sptr;
         printf(">>> %s\n", ss);
@@ -662,7 +689,7 @@ bool DictImpl::checkIntegrity() {
 
   // check if the index entry positions point to correct places
   int step = index.size() / 7;
-  if (step <= 0) {
+  if(step <= 0) {
     step = 1;
   }
 
@@ -670,7 +697,7 @@ bool DictImpl::checkIntegrity() {
     char c = 12;
     IndexEntry ie = index[i];
     fdata->read(ie.pos - 1, &c, 1);
-    if (c != 0) {
+    if(c != 0) {
       setError("Integrity failure: index corrupted");
       return false;
     }
@@ -679,9 +706,10 @@ bool DictImpl::checkIntegrity() {
   return true;
 }
 
-string DictImpl::escape(const string& str) {
-  const char* s = str.c_str();
-  string ret;
+std::string DictImpl::escape(const std::string &str)
+{
+  const char *s = str.c_str();
+  std::string ret;
 
   for(unsigned int i = 0; i < str.size(); i++) {
     switch (s[i]) {
@@ -707,12 +735,12 @@ string DictImpl::escape(const string& str) {
   return ret;
 }
 
-string DictImpl::unescape(const string& str) {
-  const char* s = str.c_str();
-  string ret;
+std::string DictImpl::unescape(const std::string &str) {
+  const char *s = str.c_str();
+  std::string ret;
 
   for(unsigned int i = 0; i < str.size(); i++) {
-    if (s[i] == 27) {
+    if(s[i] == 27) {
       i++;
       switch (s[i]) {
       case '0':
@@ -739,11 +767,12 @@ string DictImpl::unescape(const string& str) {
 // Collation comparator
 // ==================================================================
 
-CanonizedWord CollationComparator::canonizeWord(const string& word) {
-  string s = word;
+CanonizedWord CollationComparator::canonizeWord(const std::string &word)
+{
+  std::string s = word;
   for(unsigned int i = 0; i < ignoreChars.size(); i++) {
     int n;
-    while ((n = s.find(ignoreChars[i])) >= 0) {
+    while((n = s.find(ignoreChars[i])) >= 0) {
       s.erase(n, ignoreChars[i].size());
     }
   }
@@ -751,19 +780,19 @@ CanonizedWord CollationComparator::canonizeWord(const string& word) {
   CanonizedWord ss;
 //  ss.reserve( maxWordLength );
   const char *sPtr = s.c_str();
-  while( *sPtr != 0 ) {
+  while(*sPtr != 0) {
     int rune = Utf8::chartorune(&sPtr);
-    if( rune == 128 ) break;
+    if(rune == 128) break;
 
-    if( useCharPrecedence ) {
-      map<int, int>::iterator itcol = charPrecedence.find( rune );
+    if(useCharPrecedence) {
+      std::map<int, int>::iterator itcol = charPrecedence.find(rune);
       if( itcol == charPrecedence.end() )
-        ss.push_back( (unsigned short)(charPrecedenceUnknown + rune) );
+        ss.push_back((unsigned short)(charPrecedenceUnknown + rune));
       else
-        ss.push_back( itcol->second );
+        ss.push_back(itcol->second);
     }
     else
-      ss.push_back( Utf8::runetoupper(rune) );
+      ss.push_back(Utf8::runetoupper(rune));
   }
   return ss;
 }
@@ -772,63 +801,62 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
 {
   CanonizedWord::const_iterator it1 = s1.begin();
   CanonizedWord::const_iterator it2 = s2.begin();
-  if( useCharPrecedence ) {
-    for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++ ) {
+  if(useCharPrecedence) {
+    for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++) {
       // handle characters that are not defined in the collation string
       int ind1 = *it1 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it1;
       int ind2 = *it2 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it2;
       if( precedenceGroups[ind1] < precedenceGroups[ind2] ) return -1;
       if( precedenceGroups[ind1] > precedenceGroups[ind2] ) return 1;
     }
-    if( it1 == s1.end() && it2 == s2.end() ) {
-      for( it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); it1++, it2++ ) {
-        if( *it1 < *it2 ) return -1;
-        if( *it1 > *it2 ) return 1;
+    if(it1 == s1.end() && it2 == s2.end()) {
+      for(it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); it1++, it2++) {
+        if(*it1 < *it2) return -1;
+        if(*it1 > *it2) return 1;
       }
       return 0;
     }
-    if( it1 == s1.end() ) return -1;
+    if(it1 == s1.end()) return -1;
     return 1;
   } else {                      // No char precedence
-    for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++ ) {
-      if( *it1 < *it2 ) return -1;
-      if( *it1 > *it2 ) return 1;
+    for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++) {
+      if(*it1 < *it2) return -1;
+      if(*it1 > *it2) return 1;
     }
-    if( it1 == s1.end() && it2 == s2.end() ) return 0;
-    if( it1 == s1.end() ) return -1;
+    if(it1 == s1.end() && it2 == s2.end()) return 0;
+    if(it1 == s1.end()) return -1;
     return 1;
   }
 }
 
-void CollationComparator::setCollation( const string &collationDef, const string &ic )
+void CollationComparator::setCollation(const std::string &collationDef,
+                                       const std::string &ic)
 {
   int order = 0;
-  if (collationDef.size() != 0) {
-    const char *s, *t;
+  if(collationDef.size() != 0) {
+    const char *s;
     s = collationDef.c_str();
     bool isGroup = false;
     int precGroup = 1;
-    while (*s != 0) {
-      t = s;
+    while(*s != 0) {
       int rune = Utf8::chartorune(&s);
-//      cerr << string( t, s-t) << " - " << rune << "\n";
-      if( rune == 128) 
+      if(rune == 128) 
         break;
-      if( rune == '{' ) {
+      if(rune == '{') {
         isGroup = true;
         continue;
       }
-      if( rune == '}' ) {
+      if(rune == '}') {
         isGroup = false;
         precGroup++;
         continue;
       }
       charPrecedence[rune] = order++;
-      precedenceGroups.push_back( precGroup );
-      if( !isGroup )
+      precedenceGroups.push_back(precGroup);
+      if(!isGroup)
         precGroup++;
     }
-    precedenceGroups.push_back( precGroup++ );
+    precedenceGroups.push_back(precGroup++);
     charPrecedenceUnknown = order++;
     { // Add terminal keyword
       const char *s = (char *)(terminal_keyword);  // FIXME do a proper C++ cast here
@@ -848,9 +876,9 @@ void CollationComparator::setCollation( const string &collationDef, const string
   const char *s, *t;
   s = ic.c_str();
 
-  while (*s != 0) {
+  while(*s != 0) {
     t = s;
-    if (Utf8::chartorune(&s) == 128) {
+    if(Utf8::chartorune(&s) == 128) {
       break;
     }
 
