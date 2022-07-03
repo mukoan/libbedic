@@ -28,7 +28,7 @@
 
 // FIXME this is probably meant to be insertIndent but where is it used?
 void insertIdent(std::ostringstream &out, int level, bool insertNewLine);
-bool isFormatted(const std::string text, int pos);
+bool isFormatted(const std::string &text, int pos);
 
 /**
  * Apply formating to a dictionary entry, including idents and new
@@ -104,7 +104,7 @@ std::string formatDicEntry(std::string entry)
   return out.str();
 }
 
-bool isFormatted(const std::string text, int pos)
+bool isFormatted(const std::string &text, int pos)
 {
   int np = text.rfind( "\n", pos-1 );
   if(np == -1 || pos - np > 10)

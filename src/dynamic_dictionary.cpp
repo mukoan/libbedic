@@ -240,7 +240,7 @@ bool SQLiteDictionary::bind()
 
   std::string collationString, ignoreChars;
   success = getProperty("collation", collationString);
-  if( !success ) return false;
+  if(!success) return false;
   success = getProperty("search-ignore-chars", ignoreChars);
   collationComparator.setCollation(collationString, ignoreChars);
 
@@ -551,9 +551,9 @@ bool SQLiteDictionary::removeEntry(const DictionaryIteratorPtr &entry)
 static int compare_callback(void *collationPtr, int len1, const void *s1, int len2, const void *s2)
 {
   CanonizedWord w1(15), w2(15);
-  CollationComparator *comparator = (CollationComparator*)collationPtr;
-  w1 = comparator->canonizeWord(string( (char*)s1, len1));
-  w2 = comparator->canonizeWord(string( (char*)s2, len2));
+  CollationComparator *comparator = static_cast<CollationComparator *>(collationPtr);
+  w1 = comparator->canonizeWord(string((char*)s1, len1));
+  w2 = comparator->canonizeWord(string((char*)s2, len2));
   return comparator->compare(w1, w2);
 }
 

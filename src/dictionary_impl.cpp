@@ -802,7 +802,7 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
   CanonizedWord::const_iterator it1 = s1.begin();
   CanonizedWord::const_iterator it2 = s2.begin();
   if(useCharPrecedence) {
-    for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++) {
+    for( ;it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
       // handle characters that are not defined in the collation string
       int ind1 = *it1 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it1;
       int ind2 = *it2 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it2;
@@ -810,7 +810,7 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
       if( precedenceGroups[ind1] > precedenceGroups[ind2] ) return 1;
     }
     if(it1 == s1.end() && it2 == s2.end()) {
-      for(it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); it1++, it2++) {
+      for(it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
         if(*it1 < *it2) return -1;
         if(*it1 > *it2) return 1;
       }
@@ -819,7 +819,7 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
     if(it1 == s1.end()) return -1;
     return 1;
   } else {                      // No char precedence
-    for( ;it1 != s1.end() && it2 != s2.end(); it1++, it2++) {
+    for( ;it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
       if(*it1 < *it2) return -1;
       if(*it1 > *it2) return 1;
     }

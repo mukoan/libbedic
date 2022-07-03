@@ -28,7 +28,8 @@
 
 using namespace std;
 
-class SHCMImpl : public SHCM {
+class SHCMImpl : public SHCM
+{
 public:
   SHCMImpl();
 
@@ -58,11 +59,13 @@ protected:
   bool initialized;
 };
 
-SHCM *SHCM::create() {
+SHCM *SHCM::create()
+{
   return new SHCMImpl();
 }
 
-SHCMImpl::SHCMImpl() {
+SHCMImpl::SHCMImpl()
+{
   freq  = (uint32*) calloc(256, sizeof(uint32));
   symb  = (uchar*) calloc(256, sizeof(uchar));
   len   = (uchar*) calloc(256, sizeof(uchar));
@@ -75,13 +78,15 @@ SHCMImpl::SHCMImpl() {
   initialized = false;
 }
 
-void SHCMImpl::startPreEncode() {
+void SHCMImpl::startPreEncode()
+{
   for(int i = 0; i < 256; i++) {
     freq[i] = 0;
   }
 }
 
-string SHCMImpl::endPreEncode() {
+string SHCMImpl::endPreEncode()
+{
   int n;
 
   n = sh_SortFreq(freq, symb);
@@ -105,7 +110,8 @@ string SHCMImpl::endPreEncode() {
   return ret;
 }
 
-void SHCMImpl::startDecode(const std::string &Tree) {
+void SHCMImpl::startDecode(const std::string &Tree)
+{
   unsigned char *s = (unsigned char *) Tree.c_str();
 
   if(Tree.size() > sizeof(tree)) {
@@ -128,10 +134,12 @@ void SHCMImpl::startDecode(const std::string &Tree) {
   initialized = true;
 }
 
-void SHCMImpl::endDecode() {
+void SHCMImpl::endDecode()
+{
 }
 
-void SHCMImpl::preencode(const std::string &s) {
+void SHCMImpl::preencode(const std::string &s)
+{
   unsigned char *t = (unsigned char *) s.c_str();
 
   for(size_t i = 0; i < s.size(); i++) {
@@ -139,7 +147,8 @@ void SHCMImpl::preencode(const std::string &s) {
   }
 }
 
-string SHCMImpl::encode(const std::string &s) {
+string SHCMImpl::encode(const std::string &s)
+{
   unsigned int i, bits;
   uint32 bitbuf;
   unsigned char *buf = (unsigned char *) s.c_str();
@@ -190,7 +199,8 @@ string SHCMImpl::encode(const std::string &s) {
   return ret;
 }
 
-std::string SHCMImpl::decode(const std::string &ss) {
+std::string SHCMImpl::decode(const std::string &ss)
+{
   unsigned int bits, symbol;
   uint32 bitbuf, bufpos;
   std::string ret;
@@ -199,10 +209,10 @@ std::string SHCMImpl::decode(const std::string &ss) {
   unsigned char *t = (unsigned char *) ss.c_str();
 
   unsigned int lbits = t[0];
-  int j = 1;
+  unsigned int j = 1;
   blen = ss.size() - 1;
   for(unsigned int i = 0; i < (blen-1) / 4; i++) {
-    s.push_back(t[j] + (t[j+1]<<8) + (t[j+2]<<16) + (t[j+3]<<24));
+    s.push_back(t[j] + (t[j+1] << 8) + (t[j+2] << 16) + (t[j+3] << 24));
 
     j += 4;
   }

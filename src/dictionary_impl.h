@@ -268,7 +268,7 @@ protected:
     CanonizedWord word;
     long pos;
 
-    IndexEntry(CanonizedWord w, long p):word(w), pos(p) {
+    IndexEntry(const CanonizedWord &w, long p) : word(w), pos(p) {
     }
   };
 

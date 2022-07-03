@@ -54,9 +54,10 @@ class QuietException
 
 class XeroxException: public std::exception
 {
-  string message;
+  std::string message;
+
 public:
-  XeroxException( const char *message ): message( message )
+  XeroxException(const char *message) : message(message)
   {
   }
 
@@ -64,8 +65,7 @@ public:
   {
   }
   
-  
-  virtual const char *what () const throw ()
+  virtual const char *what() const throw()
   {
     return message.c_str();
   }
@@ -85,13 +85,13 @@ struct entry_type {
   int len;
   int offset;
 
-  entry_type(const string &w, const CanonizedWord &canonizedWord, int i, int p):
-    word( w ), canonizedWord( canonizedWord ), fidx( i ), pos( p )
+  entry_type(const std::string &w, const CanonizedWord &canonizedWord, int i, int p) :
+                   word(w), canonizedWord(canonizedWord), fidx(i), pos(p)
   {
   }
-		
-  bool operator<(const entry_type& e2) const {
-    int cmp = currentDict->compare( canonizedWord, e2.canonizedWord );
+
+  bool operator<(const entry_type &e2) const {
+    int cmp = currentDict->compare(canonizedWord, e2.canonizedWord) ;
     return cmp < 0;    
   }
 };
@@ -100,27 +100,27 @@ CollationComparator *entry_type::currentDict = NULL;
 
 class XeroxCollationComparator: public CollationComparator
 {
-  set<int> usedCharacters;  
+  std::set<int> usedCharacters;  
 public:
-  void checkIfCharsCollated( string &w )
+  void checkIfCharsCollated(std::string &w)
   {    
     //Check if all letters are included in char-precedence
-    if( useCharPrecedence ) {
+    if(useCharPrecedence) {
       const char *s, *t;
       s = w.c_str();
-      while (*s != 0) {
+      while(*s != 0) {
         t = s;
         int rune = Utf8::chartorune(&s);
-        if( rune == 128) 
+        if(rune == 128) 
           break;
-        if( usedCharacters.find( rune ) == usedCharacters.end() ) {
-          usedCharacters.insert( rune );
-          if( charPrecedence.find( rune ) != charPrecedence.end() )
+        if(usedCharacters.find(rune) == usedCharacters.end()) {
+          usedCharacters.insert(rune);
+          if(charPrecedence.find(rune) != charPrecedence.end())
             continue;
-          if( find( ignoreChars.begin(), ignoreChars.end(), string(t, (s-t)) ) != ignoreChars.end() )
+          if(find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
             continue;
           // Character missing both in ignoreChars and precedence list
-          std::cerr << WARNING_MSG << "character '" << string(t, (s-t)) <<
+          std::cerr << WARNING_MSG << "character '" << std::string(t, (s-t)) <<
             "' is missing both in search-ignore-chars and char-precedence\n";          
         }
       }
@@ -134,7 +134,8 @@ public:
 // Old xerox 
 // ==================================================================
 
-class XeroxDict : public DictImpl {
+class XeroxDict : public DictImpl
+{
 
   /* bedic is missing exception mechanism. checkIfError() checks bedic
    * status and throws XeroxException on error.*/
@@ -142,7 +143,7 @@ class XeroxDict : public DictImpl {
   
 public:
 
-  XeroxDict(const char* filename) : DictImpl( filename, false )
+  XeroxDict(const char *filename) : DictImpl(filename, false)
   {
   }
 
@@ -152,11 +153,11 @@ public:
    *
    * @param filename the filename of the new dictionary file
    * @param compression_method compression method
-   *	currently only "none" and "shcm" are allowed as 
-   * 	compression methods
+   *        currently only "none" and "shcm" are allowed as 
+   *        compression methods
    */  
-  bool xerox(const string& filename, const string& compress_method, 
-    bool sort = true);
+  bool xerox(const std::string &filename, const std::string &compress_method, 
+             bool sort = true);
 
   /**
    * Creates new dictionary file with the same 
@@ -164,22 +165,22 @@ public:
    *
    * @param fd the file descriptor
    * @param compression_method compression method
-   *	currently only "none" and "shcm" are allowed as 
-   * 	compression methods
+   *        currently only "none" and "shcm" are allowed as 
+   *        compression methods
    */  
-  bool xerox(int fd, const string& compress_method, 
-    bool do_sort = true);
+  bool xerox(int fd, const std::string &compress_method, bool do_sort = true);
 
-  vector<string> findAllCharacters( void );  
-  
+  std::vector<std::string> findAllCharacters(void);
+
 };
 
-bool XeroxDict::xerox(const string& filename, const string& compress_method, 
-  bool sort) {
+bool XeroxDict::xerox(const std::string &filename, const std::string &compress_method,
+                      bool sort)
+{
 
   int fd = creat(filename.c_str(), S_IREAD | S_IWRITE);
 
-  if (fd < 0) {
+  if(fd < 0) {
     return false;
   }
 
@@ -187,52 +188,51 @@ bool XeroxDict::xerox(const string& filename, const string& compress_method,
 
   close(fd);
 
-  if (!ret) {
+  if(!ret) {
     unlink(filename.c_str());
   }
 
   return ret;
 }
 
-void XeroxDict::checkIfError() {
-  string err = getError();
-  if( err.size() != 0 ) {
+void XeroxDict::checkIfError()
+{
+  std::string err = getError();
+  if(err.size() != 0) {
     ostringstream msg;
     msg << "Bedic error: " << err; 
-    throw XeroxException( msg.str().c_str() );  
+    throw XeroxException(msg.str().c_str());
   }
-    
 }
 
-bool XeroxDict::xerox(int fd, const string& compress_method, 
-  bool do_sort) {
-
+bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
+{
   entry_type::currentDict = this;
 
   checkIfError();
-  
+
   static char wdelim[] = { WORD_DELIMITER };
   static char ddelim[] = { '\0' };
   static char eql[] = { '=' };
   static char nl[] = { '\n' };
 
-  SHCM* compr = 0;
-  string s;
-  string shcm_tree;
+  SHCM *compr = 0;
+  // std::string s;  // TODO delete - unused
+  std::string shcm_tree;
 
-  if (compress_method == "shcm") {
+  if(compress_method == "shcm") {
     compr = SHCM::create();
   }
 
   // sorting
-  typedef vector<entry_type> EntryList;
+  typedef std::vector<entry_type> EntryList;
   EntryList entries;
   unsigned int mrl = 0;
   unsigned int mwl = 0;
   long dsize = 0;
 
-  set<int> usedCharacters;
-  
+  std::set<int> usedCharacters;
+
   fprintf(stderr, "Reading the entries ...\n");
   int n = 0;
   firstEntry();
@@ -240,70 +240,70 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
     checkIfError();
 
     // Check if we fit into long maximum value, -2000000 to avoid overflow before the check
-    if( currPos > LONG_MAX-2000000 )
+    if(currPos > LONG_MAX-2000000)
       throw XeroxException( "Maximum dictionary length exceeded" );
-    
-    string w = getWord();
-    if (mwl < w.size()) {
+
+    std::string w = getWord();
+    if(mwl < w.size()) {
       mwl = w.size();
     }
 //    fprintf( stderr, "%s\n", w.c_str() );
 
     //Check if all letters are includec in char-precedence
-    if( useCharPrecedence ) {
+    if(useCharPrecedence) {
       const char *s, *t;
       s = w.c_str();
-      while (*s != 0) {
+      while(*s != 0) {
         t = s;
         int rune = Utf8::chartorune(&s);
-        if( rune == 128) 
+        if(rune == 128)
           break;
-        if( usedCharacters.find( rune ) == usedCharacters.end() ) {
-          usedCharacters.insert( rune );
-          if( charPrecedence.find( rune ) != charPrecedence.end() )
+        if(usedCharacters.find(rune) == usedCharacters.end()) {
+          usedCharacters.insert(rune);
+          if(charPrecedence.find(rune) != charPrecedence.end())
             continue;
-          if( find( ignoreChars.begin(), ignoreChars.end(), string(t, (s-t)) ) != ignoreChars.end() )
+          if(find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
             continue;
           // Character missing both in ignoreChars and precedence list
           std::cerr << WARNING_MSG << "character '" << string(t, (s-t)) <<
-            "' is missing both in search-ignore-chars and char-precedence\n";          
+            "' is missing both in search-ignore-chars and char-precedence\n";
         }
       }
     }
-    
+
     unsigned int d = w.size() + getSense().size() + 2;
-    if (mrl < d) {
+    if(mrl < d) {
       mrl = d;
     }
 
-    if (compr != 0) {
+    if(compr != 0) {
       compr->preencode(w);
       compr->preencode(getSense());
     }
 
-    entries.push_back(entry_type(w, canonizeWord( w ), n, currPos));
+    entries.push_back(entry_type(w, canonizeWord(w), n, currPos));
     n++;
-  } while (nextEntry());
+  } while(nextEntry());
 
   // calculate the length of the entries
   n = 0;
   firstEntry();
   do {
-    checkIfError();    
-    
-    string w = getWord();
-    string s = getSense();
-    if (compr != 0) {
+    checkIfError();
+
+    std::string w = getWord();
+    std::string s = getSense();
+    if(compr != 0) {
       w = escape(compr->encode(w));
       s = escape(compr->encode(s));
     }
-    
-    if (mwl < w.size()) {
+
+    if(mwl < w.size()) {
       mwl = w.size();
     }
 
     unsigned int d = w.size() + s.size() + 2;
-    if (mrl < d) {
+    if(mrl < d) {
       mrl = d;
     }
 
@@ -311,22 +311,22 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
 
     entries[n].len = d;
     n++;		
-  } while (nextEntry());
+  } while(nextEntry());
 
   // Sort entries
-  if (do_sort) {
+  if(do_sort) {
     fprintf(stderr, "Sorting ...\n");
     sort(entries.begin(), entries.end());
 
     //Check if there are duplicates
     EntryList::iterator it, it_previous;
-    for( it = entries.begin(); it != entries.end(); it++ ) {
-      if( it != entries.begin() ) {
-        if( compare( it->canonizedWord, it_previous->canonizedWord )==0 )
+    for(it = entries.begin(); it != entries.end(); ++it) {
+      if(it != entries.begin()) {
+        if(compare(it->canonizedWord, it_previous->canonizedWord) == 0)
           std::cerr << WARNING_MSG << "duplicate entry '" << it->word << "'\n";
       }
       it_previous = it;
-    }    
+    }
   }
 
   n = 0;
@@ -335,11 +335,11 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
     n += entries[i].len;
   }
 
-  string idx;
+  std::string idx;
   n = -32769;
-  char* ibuf = new char[mwl+32];
+  char *ibuf = new char[mwl+32];
   for(unsigned int i = 0; i < entries.size() - 1; i++) {
-    if (n + 32768 < entries[i].offset) {
+    if(n + 32768 < entries[i].offset) {
       idx += (char) 0;
       snprintf(ibuf, mwl+32, "%s\n%d", entries[i].word.c_str(), entries[i].offset);
       idx += ibuf;
@@ -350,7 +350,7 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
 
   // saving the dictionary properties
   fprintf(stderr, "Saving the dictionary\n");
-  map<string, string> prop(properties);
+  std::map<std::string, std::string> prop(properties);
   char buf[256];
 
   snprintf(buf, sizeof(buf), "%d", mrl);
@@ -358,16 +358,16 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
   sprintf(buf, "%d", mwl);
   prop["max-word-length"] = buf;
   prop["compression-method"] = compress_method;
-  if (compr != 0) {
+  if(compr != 0) {
     // this is unnecessary second escape
     // i am leaving it for now for backward compatibility
     // with already broken dictionaries 
-    prop["shcm-tree"] = escape(shcm_tree); 
+    prop["shcm-tree"] = escape(shcm_tree);
   } else {
     prop.erase("shcm-tree");
   }
 
-  if (idx.size() > 0) {
+  if(idx.size() > 0) {
     prop["index"] = idx;
   }
 
@@ -378,31 +378,32 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
   prop["items"] = buf;
 
   time_t currentTime;
-  time( &currentTime );
-  asctime_r(localtime( &currentTime ), buf );
+  time(&currentTime);
+  asctime_r(localtime(&currentTime), buf);
   prop["builddate"] = buf;
-  
-  map<string, string>::iterator pit = prop.begin();
-  while (pit != prop.end()) {
-    pair<const string, string> entry = *pit;
-    const char* s = escape(entry.first).c_str();
+
+  std::map<std::string, std::string>::iterator pit = prop.begin();
+  while(pit != prop.end())
+  {
+    std::pair<const std::string, std::string> entry = *pit;
+    const char *s = escape(entry.first).c_str();
     unsigned int n = write(fd, s, strlen(s));
-    if (n != strlen(s)) {
+    if(n != strlen(s)) {
       return false;
     }
     n = write(fd, eql, sizeof(eql));
-    if (n != sizeof(eql)) {
+    if(n != sizeof(eql)) {
       return false;
     }
 
-    string es = escape(entry.second);
+    std::string es = escape(entry.second);
     s = es.c_str();
     n = write(fd, s, strlen(s));
-    if (n != strlen(s)) {
+    if(n != strlen(s)) {
       return false;
     }
     n = write(fd, nl, sizeof(nl));
-    if (n != sizeof(nl)) {
+    if(n != sizeof(nl)) {
       return false;
     }
     ++pit;
@@ -415,9 +416,9 @@ bool XeroxDict::xerox(int fd, const string& compress_method,
     readEntry(entries[i].pos);
     checkIfError();
 
-    string w = getWord();
-    string s = getSense();
-    if (compr != 0) {
+    std::string w = getWord();
+    std::string s = getSense();
+    if(compr != 0) {
       w = escape(compr->encode(w));
       s = escape(compr->encode(s));
     }
@@ -451,49 +452,49 @@ int collate_compare(const void *va, const void *vb)
 
 //struct CollateCmp: public binary_function< const char*, const char*, int >
 
-struct CollateCmp : public binary_function<string,string,bool>
+struct CollateCmp : public binary_function<std::string,std::string,bool>
 {
-  bool operator()(const string & x, const string& y) const
+  bool operator()(const std::string &x, const std::string &y) const
   {
-    return strcoll( x.c_str(), y.c_str() ) < 0;
+    return strcoll(x.c_str(), y.c_str()) < 0;
   }
 };
 
-vector<string> XeroxDict::findAllCharacters( void )
+std::vector<std::string> XeroxDict::findAllCharacters(void)
 {
   
-  cerr << "Reading the entries and looking for all letters...\n";
-  set<string> foundLetters;
+  std::cerr << "Reading the entries and looking for all letters...\n";
+  std::set<std::string> foundLetters;
   firstEntry();
   do {
-    string w = getWord();
+    std::string w = getWord();
     checkIfError();
     const char *cBeg, *cEnd;
     cBeg = w.c_str();
 //    fprintf( stderr, "%s\n", w.c_str() );
-    while( *cBeg != 0 ) {
+    while(*cBeg != 0) {
       cEnd = cBeg;
       int rune = Utf8::chartorune(&cEnd);
-      if( rune == 128) 
+      if(rune == 128)
         break;
 
       int len = cEnd-cBeg;
-      assert( len <= 4 && len >= 1 );
+      assert(len <= 4 && len >= 1);
       char letter[5];
-      strncpy( letter, (char*)cBeg, len );
+      strncpy(letter, (char*)cBeg, len);
       letter[len]=0;
-      if( foundLetters.find( letter ) == foundLetters.end() ) {
-        foundLetters.insert( string(letter) );
+      if(foundLetters.find(letter) == foundLetters.end()) {
+        foundLetters.insert(string(letter));
 //        fprintf( stderr, "%s: %s\n", w.c_str(), letter );
       }
       cBeg = cEnd;
     }
-  } while (nextEntry());
+  } while(nextEntry());
 
-  vector<string> letterVec(foundLetters.begin(), foundLetters.end());
+  std::vector<std::string> letterVec(foundLetters.begin(), foundLetters.end());
 //   map<string, bool>::iterator it;
 //   for( it = foundLetters.begin(); it != foundLetters.end(); it++ )
-//     letterVec.push_back( it->first );  
+//     letterVec.push_back( it->first );
 
   return letterVec;
 }
@@ -515,13 +516,13 @@ static void errorCheck(bool condition, const char *description)
 }
 
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
   bool generateCharPrecedence = false;
   
   try {
-    const char* cmth = "none";
-    char *localeForCharPrec;
+    const char *cmth = "none";
+    char *localeForCharPrec = nullptr;
 
     static struct option cmdLineOptions[] = {
       { "help", no_argument, NULL, 'h' },
@@ -531,10 +532,11 @@ int main(int argc, char** argv) {
     };
 
     int optionIndex = 0;
-    while( 1 ) {
+    while(1)
+    {
       int c = getopt_long(argc, argv, "hvdg:s", cmdLineOptions, &optionIndex);
-      if( c == -1 ) break;
-      switch( c ) {
+      if(c == -1) break;
+      switch(c) {
       case 'h':
         printHelp();
         throw QuietException();
@@ -556,58 +558,61 @@ int main(int argc, char** argv) {
 
     const char *sourceFileName, *destFileName;
 
-    if( generateCharPrecedence )
-      errorCheck( optind == argc - 1, "A single dictionary file must be specified" );
+    if(generateCharPrecedence)
+      errorCheck(optind == argc - 1, "A single dictionary file must be specified");
     else
-      errorCheck( optind == argc - 2, "Both input and output file must be specified" );
+      errorCheck(optind == argc - 2, "Both input and output file must be specified");
 
     sourceFileName = argv[optind++];
     destFileName = argv[optind++];
     
-    XeroxDict* dict = new XeroxDict( sourceFileName ); 
-    
+    XeroxDict *dict = new XeroxDict(sourceFileName);
+
     if (dict == 0)
-      throw XeroxException( "Cannot read the dictionary" );
+      throw XeroxException("Cannot read the dictionary");
 
-    if( generateCharPrecedence ) {
-
+    if(generateCharPrecedence) {
       // Set locale for LC_COLLATE
-      char *oldloc = setlocale( LC_COLLATE, localeForCharPrec );
-      if( oldloc == NULL ) {
+      char *oldloc;
+
+      if(localeForCharPrec == nullptr)
+        oldloc = setlocale(LC_COLLATE, "");
+      else
+        oldloc = setlocale(LC_COLLATE, localeForCharPrec);
+
+      if(oldloc == NULL) {
         ostringstream msg;
-        msg << "Can not set locale '" << localeForCharPrec << "'";
+        msg << "Cannot set locale '" << localeForCharPrec << "'";
         throw XeroxException( msg.str().c_str() );
       }
 
       // Find all letters used for key-words in the dictionary
-      vector<string> usedCharacters = dict->findAllCharacters();
+      std::vector<std::string> usedCharacters = dict->findAllCharacters();
 
       // Sort letters using collation
       CollateCmp cmp;
-      sort( usedCharacters.begin(), usedCharacters.end(), cmp );      
+      sort(usedCharacters.begin(), usedCharacters.end(), cmp);
 
       // Output the result
-      cout << "char-precedence=";
-      for( unsigned int i = 0; i < usedCharacters.size(); i++ )
-        cout << usedCharacters[i];
-      cout << "\n";
-      
+      std::cout << "char-precedence=";
+      for(unsigned int i = 0; i < usedCharacters.size(); i++)
+        std::cout << usedCharacters[i];
+      std::cout << "\n";
+
     } else {                    // Normal xerox mode
-      if( !strcmp( destFileName, "-" ) ) { // stdout
+      if(!strcmp(destFileName, "-")) { // stdout
         dict->xerox((int)1, cmth);
       } else {
         dict->xerox(destFileName, cmth);
       }
     }
-    
+
     return EXIT_SUCCESS;
   }
-  catch(QuietException  ex) {
+  catch(QuietException &ex) {
     return EXIT_FAILURE;
   }
   catch(XeroxException &ex) {
     std::cerr << PROG_NAME ": " << ex.what() << "\n";
   }
-  
-
 }

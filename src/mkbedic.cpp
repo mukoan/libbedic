@@ -203,9 +203,10 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
     fprintf(stderr, "Sorting ...\n");
     sort(entries.begin(), entries.end());
 
-    //Check if there are duplicates
+    // Check if there are duplicates
     EntryList::iterator it, it_previous;
-    for(it = entries.begin(); it != entries.end(); it++) {
+    it_previous = entries.begin();  // silence static analysis warning
+    for(it = entries.begin(); it != entries.end(); ++it) {
       if(it != entries.begin()) {
         if(comparator->compare(it->canonizedWord, it_previous->canonizedWord) == 0)
           std::cerr << WARNING_MSG << "duplicate entry '" << it->word << "'\n";
@@ -568,7 +569,7 @@ int main(int argc, char **argv)
 
     return EXIT_SUCCESS;
   }
-  catch(QuietException  ex) {
+  catch(QuietException &ex) {
     return EXIT_FAILURE;
   }
   catch(XeroxException &ex) {
