@@ -57,7 +57,7 @@ class XeroxException: public std::exception
   std::string message;
 
 public:
-  XeroxException(const char *message) : message(message)
+  explicit XeroxException(const char *message) : message(message)
   {
   }
 
@@ -143,7 +143,7 @@ class XeroxDict : public DictImpl
   
 public:
 
-  XeroxDict(const char *filename) : DictImpl(filename, false)
+  explicit XeroxDict(const char *filename) : DictImpl(filename, false)
   {
   }
 
@@ -199,7 +199,7 @@ void XeroxDict::checkIfError()
 {
   std::string err = getError();
   if(err.size() != 0) {
-    ostringstream msg;
+    std::ostringstream msg;
     msg << "Bedic error: " << err; 
     throw XeroxException(msg.str().c_str());
   }
@@ -428,7 +428,7 @@ bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
     write(fd, s.c_str(), s.size());
     write(fd, ddelim, sizeof(ddelim));
 
-    if (i % 1024 == 0) {
+    if(i % 1024 == 0) {
       fprintf(stderr, ".");
     }
   }
@@ -581,7 +581,7 @@ int main(int argc, char **argv) {
         oldloc = setlocale(LC_COLLATE, localeForCharPrec);
 
       if(oldloc == NULL) {
-        ostringstream msg;
+        std::ostringstream msg;
         msg << "Cannot set locale '" << localeForCharPrec << "'";
         throw XeroxException( msg.str().c_str() );
       }

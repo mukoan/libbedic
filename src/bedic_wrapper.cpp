@@ -42,7 +42,7 @@ protected:
   Dictionary *dic;
 
 protected:
-  BedicDictionary(Dictionary *dic) : dic(dic)
+  explicit BedicDictionary(Dictionary *dic) : dic(dic)
   {
   }
 

@@ -53,9 +53,9 @@ unsigned char terminal_keyword[] = { 0xc2, 0xb6 };
  * Dictionary class implementation
  *
  **************************************************************************/
-Dictionary* Dictionary::create(const char* filename, bool doCheckIntegrity)
+Dictionary *Dictionary::create(const char *filename, bool doCheckIntegrity)
 {
-  DictImpl* dict = new DictImpl(filename, doCheckIntegrity);
+  DictImpl *dict = new DictImpl(filename, doCheckIntegrity);
 
   return dict;
 }
@@ -77,7 +77,7 @@ DictImpl::DictImpl(const char *filename, bool doCheckIntegrity): buf(nullptr)
 {
   fileName = filename;
 
-  compressor = 0;
+  compressor = nullptr;
 
   if(strlen(filename) > 3 && strcmp(&filename[strlen(filename) - 3], ".dz") == 0)
   {
@@ -142,18 +142,18 @@ DictImpl::~DictImpl()
   delete fdata;
 }
 
-const string& DictImpl::getName() const
+const std::string &DictImpl::getName() const
 {
   return name;
 }
 
-const string& DictImpl::getFileName() const
+const std::string &DictImpl::getFileName() const
 {
   return fileName;
 }
 
 
-bool DictImpl::findEntry(const string& w, bool& subword)
+bool DictImpl::findEntry(const std::string &w, bool &subword)
 {
   long b, e, m;
   bool found;
@@ -385,7 +385,7 @@ bool DictImpl::readEntry(long pos)
 
   char *p = (char *) memchr(buf, WORD_DELIMITER, pp-buf);
   if(p == 0) {
-    stringstream s;
+    std::stringstream s;
     s << "readEntry: invalid entry format. Entry content: '"
       << buf
       << "'";
@@ -394,7 +394,7 @@ bool DictImpl::readEntry(long pos)
   }
   *p = '\0';
   currWord = string(buf);
-  if(compressor != 0) {
+  if(compressor) {
     currWord = unescape(currWord);
     currWord = compressor->decode(currWord);
   }
@@ -404,7 +404,7 @@ bool DictImpl::readEntry(long pos)
 
   currSense=string(p+1);
   senseCompressed=false;
-  if(compressor != 0) {
+  if(compressor) {
     senseCompressed=true;
 //  currSense = unescape(currSense);
 //  currSense = compressor->decode(currSense);
@@ -538,7 +538,7 @@ int DictImpl::readProperties()
   maxWordLength = 50;
   string ns = properties["max-word-length"];
   if(ns.size() != 0) {
-    char* eptr;
+    char *eptr;
     int n = strtol(ns.c_str(), &eptr, 0);
     if(*eptr == '\0') {
       maxWordLength = n + 5;
@@ -550,7 +550,7 @@ int DictImpl::readProperties()
   maxEntryLength = 16384;
   ns = properties["max-entry-length"];
   if(ns.size() != 0) {
-    char* eptr;
+    char *eptr;
     int n = strtol(ns.c_str(), &eptr, 0);
     if(*eptr == '\0') {
       maxEntryLength = n + 10;
@@ -597,10 +597,10 @@ int DictImpl::readProperties()
     std::string idx(ns, n+1, i-n);
     int k = idx.find('\n');
     std::string word(idx, 0, k);
-    std::string pos(idx, k+1);
-    char* eptr;
+    std::string spos(idx, k+1);
+    char *eptr;
 
-    long l = strtol(pos.c_str(), &eptr, 0);
+    long l = strtol(spos.c_str(), &eptr, 0);
     if(*eptr != '\0') {
 //  printf("error\n");
       index.clear();
@@ -627,7 +627,7 @@ int DictImpl::getLine(std::string &line, int &pos)
   p = pos;
   while(1) {
     n = fdata->read(p, buf, sizeof(buf));
-    if (n < 0) {
+    if(n < 0) {
       return 0;
     } else if (n == 0) {
       break;
@@ -712,7 +712,7 @@ std::string DictImpl::escape(const std::string &str)
   std::string ret;
 
   for(unsigned int i = 0; i < str.size(); i++) {
-    switch (s[i]) {
+    switch(s[i]) {
     case WORD_DELIMITER:
       ret.push_back(27);
       ret.push_back('n');
@@ -724,7 +724,7 @@ std::string DictImpl::escape(const std::string &str)
       break;
 
     default:
-      if( s[i] == DATA_DELIMITER ) {
+      if(s[i] == DATA_DELIMITER) {
         ret.push_back(27);
         ret.push_back('0');
       } else
@@ -786,7 +786,7 @@ CanonizedWord CollationComparator::canonizeWord(const std::string &word)
 
     if(useCharPrecedence) {
       std::map<int, int>::iterator itcol = charPrecedence.find(rune);
-      if( itcol == charPrecedence.end() )
+      if(itcol == charPrecedence.end())
         ss.push_back((unsigned short)(charPrecedenceUnknown + rune));
       else
         ss.push_back(itcol->second);
@@ -806,8 +806,8 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
       // handle characters that are not defined in the collation string
       int ind1 = *it1 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it1;
       int ind2 = *it2 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it2;
-      if( precedenceGroups[ind1] < precedenceGroups[ind2] ) return -1;
-      if( precedenceGroups[ind1] > precedenceGroups[ind2] ) return 1;
+      if(precedenceGroups[ind1] < precedenceGroups[ind2]) return -1;
+      if(precedenceGroups[ind1] > precedenceGroups[ind2]) return 1;
     }
     if(it1 == s1.end() && it2 == s2.end()) {
       for(it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
@@ -859,9 +859,9 @@ void CollationComparator::setCollation(const std::string &collationDef,
     precedenceGroups.push_back(precGroup++);
     charPrecedenceUnknown = order++;
     { // Add terminal keyword
-      const char *s = (char *)(terminal_keyword);  // FIXME do a proper C++ cast here
-      int rune = Utf8::chartorune(&s);
-      precedenceGroups.push_back( precGroup );
+      const char *tk = (char *)(terminal_keyword);  // FIXME do a proper C++ cast here
+      int rune = Utf8::chartorune(&tk);
+      precedenceGroups.push_back(precGroup);
       charPrecedence[rune] = order;
     }
     useCharPrecedence = true;

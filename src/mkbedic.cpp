@@ -57,7 +57,7 @@ class XeroxException: public std::exception
   std::string message;
 
 public:
-  XeroxException(const char *message) : message(message)
+  explicit XeroxException(const char *message) : message(message)
   {
   }
 
@@ -132,11 +132,11 @@ public:
     //Check if all letters are included in char-precedence
     if(useCharPrecedence)
     {
-      const char *s, *t;
+      const char *s;
       s = w.c_str();
 
       while(*s != 0) {
-        t = s;
+        const char *t = s;
         int rune = Utf8::chartorune(&s);
         if(rune == 128)
           break;
@@ -162,7 +162,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
   entry_type::currentDict = comparator;
 
 //  string s;
-  std::string shcm_tree;
+//  std::string shcm_tree;  // Not used
 
   // sorting
   typedef std::vector<entry_type> EntryList;
@@ -176,7 +176,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
   dictSource->firstEntry();
   // calculate the length of the entries and read key-words
   while(true) {
-    string w, s;
+    std::string w, s;
     long currPos = dictSource->nextEntry(w, s);
     if(currPos < 0) break;
 
@@ -261,7 +261,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
 
   std::map<std::string, std::string>::iterator pit = prop.begin();
   for( ;pit != prop.end(); ++pit) {
-    pair<const std::string, std::string> entry = *pit;
+    std::pair<const std::string, std::string> entry = *pit;
     int written = fprintf(fhOut, "%s=%s\x0a",
                           DictImpl::escape(entry.first).c_str(),
                           DictImpl::escape(entry.second).c_str());
@@ -273,7 +273,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
   fwrite("\x00", 1, 1, fhOut);
 
   for(unsigned int i = 0; i < entries.size(); i++) {
-    string w, s;
+    std::string w, s;
     dictSource->readEntry(entries[i].pos, w, s);
 
     fprintf(fhOut, "%s\x0a%s", w.c_str(), s.c_str());
@@ -302,7 +302,7 @@ protected:
   FILE *fh;
   
 public:
-  LineReader(FILE *fh) : lineBuf(NULL), lineNo(0), fh(fh)
+  explicit LineReader(FILE *fh) : lineBuf(NULL), lineNo(0), fh(fh)
   {
     lineBuf = new char [lineBufSize];
   }
@@ -350,10 +350,10 @@ static void readProperties(LineReader *in, std::map<std::string, std::string> &p
 
     if(read[0] == 0) break; // Empty line - no more properties
     
-    string line = read;
+    std::string line = read;
     int n = line.find('=');
     if(n < 0) {
-      ostringstream msg;
+      std::ostringstream msg;
       msg << "line " << in->getLineNo() << ": '=' missing in the property line: '" << read << "'";
       throw XeroxException( msg.str().c_str() );
     }
@@ -372,7 +372,7 @@ class TextDictSrc: public DictionarySource, public LineReader
   long firstPos;
 
 public:
-  TextDictSrc(FILE *fhDic) : LineReader(fhDic)
+  explicit TextDictSrc(FILE *fhDic) : LineReader(fhDic)
   {
   }
 
@@ -385,20 +385,20 @@ public:
     firstPos = ftell(fh);
   }
 
-  bool firstEntry()
+  bool firstEntry() override
   {
     if(fseek(fh, firstPos, SEEK_SET) != 0)
       throw XeroxException("Cannot read dictionary file (fseek failed)");
     return true;
   }
 
-  long nextEntry(std::string &keyWord, std::string &description)
+  long nextEntry(std::string &keyWord, std::string &description) override
   {
     long pos = ftell(fh);
     return readEntry(pos, keyWord, description) ? pos : -1;
   }
   
-  bool readEntry(long pos, std::string &keyWord, std::string &description)
+  bool readEntry(long pos, std::string &keyWord, std::string &description) override
   {
     // Check if we fit into long maximum value, -2000000 to avoid overflow before the check
     if(pos > LONG_MAX-2000000)
@@ -428,7 +428,7 @@ public:
     }
 
     if(description.empty()) {
-      ostringstream msg;
+      std::ostringstream msg;
       msg << "line " << getLineNo() << ": Missing description for item '" << keyWord << "'";
       throw XeroxException(msg.str().c_str());
     }
@@ -513,7 +513,7 @@ int main(int argc, char **argv)
       FILE *fhDic, *fhOut;
       fhDic = fopen(sourceFileName, "r");
       errorCheck(fhDic != NULL, "Cannot open input file for reading");
-      if(!strcmp( destFileName, "-" ))
+      if(!strcmp(destFileName, "-" ))
         fhOut = stdout;
       else
         fhOut = fopen(destFileName, "wb");
@@ -539,7 +539,7 @@ int main(int argc, char **argv)
           fhHeader = fopen(headerFile, "r");
 
         errorCheck(fhHeader != NULL, "Cannot open header file for reading");
-        LineReader headerLR( fhHeader );
+        LineReader headerLR(fhHeader);
         readProperties(&headerLR, properties);
         if(fhHeader != stdout) fclose(fhHeader);
       }

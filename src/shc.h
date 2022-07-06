@@ -1,6 +1,6 @@
 /**
  * @file   shc.h
- * @brief
+ * @brief  Static Huffman Codec, see https://web.archive.org/web/20110922030311/http://webcenter.ru/~xander/
  * @author Simakov Alexander, modified by Lyndon Hill
  * @note   Original comment below documentation header.
  *         This header written by Lyndon Hill.
@@ -64,7 +64,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen);
  *  Return: symb - sorted symbols
  *  Notes: none
  */
-void sh_SortLen(uchar *len, uchar *symb, int n); 
+void sh_SortLen(uchar *len, uchar *symb, int n);
 
 /*  Function: sh_CalcCode()
  *  Purpose: calculate canonical huffman codes

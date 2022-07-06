@@ -62,7 +62,7 @@ class SQLiteDictionary: public DynamicDictionary
   CollationComparator collationComparator;
 
 protected:
-  SQLiteDictionary(const char *fileName);
+  explicit SQLiteDictionary(const char *fileName);
 
   bool bind();
 

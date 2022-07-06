@@ -37,10 +37,10 @@ public:
   DZFile();
   virtual ~DZFile();
 
-  virtual int open(const char *fname);
-  virtual int close();
-  virtual int size();
-  virtual int read(int pos, char *buf, int buflen);
+  virtual int open(const char *fname) override;
+  virtual int close() override;
+  virtual int size() override;
+  virtual int read(int pos, char *buf, int buflen) override;
 
 protected:
   z_stream zstream;

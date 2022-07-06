@@ -1,6 +1,6 @@
 /**
  * @file   shc.c
- * @brief
+ * @brief  Static Huffman Codec
  * @author Simakov Alexander, modified by Lyndon Hill
  * @note   Original comment below documentation header
  */
@@ -96,7 +96,7 @@ void sh_CalcLen(uint32 *freq, uchar *symb, uchar *len, int n, int maxlen) {
         if (leaf>=n || freq[symb[root]]<freq[symb[leaf]]) {
             freq[symb[next]]=freq[symb[root]];
             freq[symb[root++]]=next;
-        } else 
+        } else
             freq[symb[next]]=freq[symb[leaf++]];
 
         if(leaf>=n || (root<next && freq[symb[root]]<freq[symb[leaf]])) {
@@ -296,7 +296,7 @@ int sh_PackTree(uchar *len, uchar *symb, uchar *aux, uint32 *buf, int n) {
             bitbuf<<=bits;
             bitbuf|=(curval>>(curbits-bits));
             buf[bufpos++]=bitbuf;
-            bitbuf=curval; 
+            bitbuf=curval;
             bits+=(32-curbits);
             treesize++;
         }

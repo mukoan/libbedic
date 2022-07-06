@@ -20,11 +20,11 @@ File::File() {
 }
 
 File::~File() {
-  close();
+  File::close();
 }
 
-int File::open(const char* fname) {
-  if( !strcmp( fname, "-" ) )
+int File::open(const char *fname) {
+  if(!strcmp( fname, "-" ))
     fd = 0;                     // stdin
   else 
     fd = ::open(fname, O_RDONLY);
@@ -33,7 +33,7 @@ int File::open(const char* fname) {
 
 int File::close() {
   int ret = 0;
-  if (fd != -1 && fd != 1) {
+  if(fd != -1 && fd != 1) {
     ret = ::close(fd);
   }
   fd = -1;
@@ -54,7 +54,7 @@ int File::read(int offset, char* buf, int buflen) {
 
 
 
-DZFile::DZFile() : chunks( NULL ), inbuf( NULL ), outbuf( NULL )
+DZFile::DZFile() : chunks(NULL), inbuf(NULL), outbuf(NULL)
 {
   zstream.zalloc    = 0;
   zstream.zfree     = 0;
@@ -66,36 +66,36 @@ DZFile::DZFile() : chunks( NULL ), inbuf( NULL ), outbuf( NULL )
 }
 
 DZFile::~DZFile() {
-  close();
+  DZFile::close();
   inflateEnd(&zstream);
 }
 
-int DZFile::open(const char* fname) {
+int DZFile::open(const char *fname) {
   int ret = File::open(fname);
-  if (ret < 0) {
+  if(ret < 0) {
     return ret;
   }
 
   unsigned char buf[22];
   int flags;
 
-  if (::read(fd, buf, sizeof(buf)) != sizeof(buf)) {
+  if(::read(fd, buf, sizeof(buf)) != sizeof(buf)) {
     return -1;
   }
 
   flags = buf[3];
   // check if it is GZIP file and if there is FEXTRA field
-  if (buf[0] != 0x1f || buf[1] != 0x8b || !(flags&0x04)) {
+  if(buf[0] != 0x1f || buf[1] != 0x8b || !(flags&0x04)) {
     return -1;
   }
 
   // check if the extra field is the one we are looking for
-  if (buf[12] != 'R' || buf[13] != 'A') {
+  if(buf[12] != 'R' || buf[13] != 'A') {
     return -1;
   }
 
   // check if the subfield version is the one we support
-  if (buf[16] != 1 || buf[17] != 0) {
+  if(buf[16] != 1 || buf[17] != 0) {
     return -1;
   }
 
@@ -112,25 +112,25 @@ int DZFile::open(const char* fname) {
   delete[] tmp;
 
   // FNAME
-  if (flags & 0x08) {
-    while (::read(fd, buf, 1)) {
-      if (buf[0] == 0) {
+  if(flags & 0x08) {
+    while(::read(fd, buf, 1)) {
+      if(buf[0] == 0) {
         break;
       }
     }
   }
 
   // COMMENT
-  if (flags & 0x10) {
-    while (::read(fd, buf, 1)) {
-      if (buf[0] == 0) {
+  if(flags & 0x10) {
+    while(::read(fd, buf, 1)) {
+      if(buf[0] == 0) {
         break;
       }
     }
   }
 
   // FHCRC
-  if (flags & 0x02) {
+  if(flags & 0x02) {
     ::read(fd, buf, 2);
   }
 
@@ -153,17 +153,17 @@ int DZFile::open(const char* fname) {
 }
 
 int DZFile::close() {
-  if (chunks) {
+  if(chunks) {
     delete[] chunks;
     chunks = 0;
   }
 
-  if (inbuf) {
+  if(inbuf) {
     delete[] inbuf;
     inbuf = 0;
   }
 
-  if (outbuf) {
+  if(outbuf) {
     delete[] outbuf;
     outbuf = 0;
   }
@@ -172,15 +172,15 @@ int DZFile::close() {
 }
 
 int DZFile::size() {
-  if (fd < 0) {
+  if(fd < 0) {
     return -1;
   }
 
   return fsize;
 }
 
-int DZFile::read(int pos, char* buf, int buflen) {
-  if (fd < 0) {
+int DZFile::read(int pos, char *buf, int buflen) {
+  if(fd < 0) {
     return -1;
   }
 
@@ -188,7 +188,7 @@ int DZFile::read(int pos, char* buf, int buflen) {
   int co = pos - cp * chunkLen;
 
   int n = buflen;
-  while (n>0 && cp<chunkCount) {
+  while(n>0 && cp<chunkCount) {
     if (cchunk != cp) {
       lseek(fd, chunks[cp], SEEK_SET);
       ::read(fd, inbuf, chunks[cp+1] - chunks[cp]);
@@ -196,7 +196,7 @@ int DZFile::read(int pos, char* buf, int buflen) {
       zstream.avail_in = chunks[cp+1] - chunks[cp];
       zstream.next_out = (Bytef *) outbuf;
       zstream.avail_out = outbufsize;
-      if (inflate(&zstream, Z_PARTIAL_FLUSH) != Z_OK) {
+      if(inflate(&zstream, Z_PARTIAL_FLUSH) != Z_OK) {
         return -1;
       }
 
@@ -205,7 +205,7 @@ int DZFile::read(int pos, char* buf, int buflen) {
     }
 
     int len = n;
-    if (co+len > outbuflen) {
+    if(co+len > outbuflen) {
       len = outbuflen-co;
     }
 
