@@ -25,24 +25,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <exception>
-#include <iostream>
 #include <getopt.h>
 #include <sys/stat.h>
+#include <locale.h>
+#include <assert.h>
 
+#include <exception>
+#include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <set>
 
-#include <locale.h>
-
 #include "dictionary_impl.h"
 #include "utf8.h"
 
-#include <assert.h>
-
 #define PROG_NAME "xerox"
-
 #define WARNING_MSG "xerox warning: "
 
 static bool verbose = false;

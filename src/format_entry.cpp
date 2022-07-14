@@ -20,19 +20,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <ctype.h>
+
 #include <string>
 #include <sstream>
 #include <iostream>
 
-#include <ctype.h>
-
-// FIXME this is probably meant to be insertIndent but where is it used?
+/**
+ * Create an indented string
+ * @param out            Output string stream
+ * @param level          Level of indentation
+ * @param insertNewLine  Start the string with a newline character
+ *
+ * FIXME this is probably meant to be insertIndent but where is it used?
+ */
 void insertIdent(std::ostringstream &out, int level, bool insertNewLine);
+
+/**
+ * Check if a string is formatted
+ * @param text           String to be checked
+ * @param pos            Start position
+ * @return  true if there is a linefeed within 10 chars of pos
+ */
 bool isFormatted(const std::string &text, int pos);
 
 /**
  * Apply formating to a dictionary entry, including idents and new
  * lines.
+ * @param entry          Input string
+ * @return  formatted string
  */
 std::string formatDicEntry(std::string entry)
 {

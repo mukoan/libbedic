@@ -21,10 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "bedic.h"
-
 #include <string.h>
 #include <stdio.h>
+
+#include "bedic.h"
 
 StaticDictionary *loadBedicDictionary(const char *filename, bool doCheckIntegrity,
                                       std::string &errorMessage);
@@ -32,6 +32,13 @@ DynamicDictionary *loadSQLiteDictionary(const char *fileName, std::string &error
 DynamicDictionary *loadHybridDictionary(const char *fileName, std::string &errorMessage);
 
 
+/**
+ * Load any dictionary type
+ * @param filename          The filename
+ * @param doCheckIntegrity  Check the integrity if it's an old format dictionary
+ * @param errorMessage      Any error message produced during the loading process    
+ * @return  the dictionary after loading
+ */
 StaticDictionary *StaticDictionary::loadDictionary(const char *filename,
                                                    bool doCheckIntegrity,
                                                    std::string &errorMessage)
@@ -50,4 +57,3 @@ StaticDictionary *StaticDictionary::loadDictionary(const char *filename,
     return loadBedicDictionary(filename, doCheckIntegrity, errorMessage);
   }
 }
-

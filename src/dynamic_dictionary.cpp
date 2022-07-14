@@ -241,12 +241,12 @@ bool SQLiteDictionary::bind()
   std::string collationString, ignoreChars;
   success = getProperty("collation", collationString);
   if(!success) return false;
-  success = getProperty("search-ignore-chars", ignoreChars);
+  getProperty("search-ignore-chars", ignoreChars);
   collationComparator.setCollation(collationString, ignoreChars);
 
 //  sqlite3_exec( _db, "reindex bedic", NULL, NULL, NULL );
 
-  return true;
+  return true;   // TODO check if search-ignore-chars is optional
 }
 
 //=============================
@@ -445,7 +445,7 @@ bool SQLiteDictionary::getProperty(const char *propertyName, std::string &proper
   
   sqlite3_bind_text(stmt, 1, propertyName, strlen(propertyName), SQLITE_TRANSIENT);
   if(sqlite3_step( stmt ) == SQLITE_ROW) {
-    propertyValue = (const char*)sqlite3_column_text(stmt, 0);
+    propertyValue = (const char *)sqlite3_column_text(stmt, 0);
   }
   sqlite3_reset(stmt);
 

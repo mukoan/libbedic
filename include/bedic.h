@@ -167,7 +167,7 @@ public:
   
 };
 
-class DynamicDictionary: public StaticDictionary
+class DynamicDictionary : public StaticDictionary
 {
 public:
   virtual ~DynamicDictionary()

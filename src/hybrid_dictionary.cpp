@@ -1,34 +1,34 @@
-/****************************************************************************
-* hybrid_dictionary.cpp
-*
-* Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
-*
-* This is an implementation of editable - dynamic dictionary
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-****************************************************************************/
+/**
+ * @file   hybrid_dictionary.cpp
+ * @brief  This is an implementation of editable - dynamic dictionary
+ * @author Lyndon Hill and others
+ *
+ * Copyright (C) 2005 Rafal Mantiuk <rafm@users.sourceforge.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include "bedic.h"
 #include "dictionary_impl.h"
 
-
 class HybridDictionaryIterator;
 
-/** Hybrid dictionary consists of a large static (bedic) dictionary
+/**
+ * Hybrid dictionary consists of a large static (bedic) dictionary
  * and a small dynamic (sqlite) dictionary, which are searched
- * together. All aditing is done on the dynamic dictionary.
+ * together. All editing is done on the dynamic dictionary.
  */
 class HybridDictionary: public DynamicDictionary
 {
@@ -40,7 +40,7 @@ class HybridDictionary: public DynamicDictionary
 protected:
   std::string errorString;
 
-  StaticDictionary *static_dic;
+  StaticDictionary  *static_dic;
   DynamicDictionary *dynamic_dic;
 
   explicit HybridDictionary(const char *fileName);
@@ -67,8 +67,13 @@ public:
     return false;
   }
 
+  /// Insert an entry to the dynamic dictionary
   DictionaryIteratorPtr insertEntry(const char *keyword);
+
+  /// Updates an entry to the dynamic dictionary, creates it if it doesn't exist
   bool updateEntry(const DictionaryIteratorPtr &entry, const char *description);
+
+  /// Removes the entry from the dynamic dictionary
   bool removeEntry(const DictionaryIteratorPtr &entry);
 };
 
@@ -76,42 +81,42 @@ public:
 
 class HybridDictionaryIterator : public DictionaryIterator
 {
-//  HybridDictionary *dic;
-
   DictionaryIterator *static_it, *dynamic_it;
   CollationComparator* cmp;
-
-//  std::string keyword;
 
   enum { NoOrder = 0, StaticFirst, DynamicFirst, BothSame } order;
 
   DictionaryIterator *getFirstIterator()
   {
-    switch( order ) {
-    case NoOrder:
+    switch(order)
     {
-//      printf( "%s - %s\n", static_it->getKeyword(), dynamic_it->getKeyword() );
-      CanonizedWord word_s = cmp->canonizeWord(static_it->getKeyword());
-      CanonizedWord word_d = cmp->canonizeWord(dynamic_it->getKeyword());
-      int res = cmp->compare( word_s, word_d );
-      if(res == 0) {
-        order = BothSame;
-        return dynamic_it;
-      } else if(res < 0) {
-        order = StaticFirst;
-        return static_it;
-      } else {
-        order = DynamicFirst;
-        return dynamic_it;
+      case NoOrder:
+      {
+        CanonizedWord word_s = cmp->canonizeWord(static_it->getKeyword());
+        CanonizedWord word_d = cmp->canonizeWord(dynamic_it->getKeyword());
+        int res = cmp->compare( word_s, word_d );
+        if(res == 0) {
+          order = BothSame;
+          return dynamic_it;
+        } else if(res < 0) {
+          order = StaticFirst;
+          return static_it;
+        } else {
+          order = DynamicFirst;
+          return dynamic_it;
+        }
       }
+
+      case DynamicFirst:
+        return dynamic_it;
+
+      case StaticFirst:
+        return static_it;
+
+      case BothSame:
+        return dynamic_it;
     }
-    case DynamicFirst:
-      return dynamic_it;
-    case StaticFirst:
-      return static_it;
-    case BothSame:
-      return dynamic_it;
-    } 
+
     return static_it;
   }
 
@@ -185,24 +190,22 @@ DictionaryIteratorPtr HybridDictionary::findEntry(const char *keyword, bool &mat
   matches = matches_static || matches_dynamic;
   return it;
 }
-// ============= Constructors ==============
 
+
+// Constructor
 HybridDictionary::HybridDictionary(StaticDictionary *static_dic, DynamicDictionary *dynamic_dic) :
-                                              static_dic(static_dic), dynamic_dic( dynamic_dic )
+                                              static_dic(static_dic), dynamic_dic(dynamic_dic)
 {
 }
 
+// Destructor
 HybridDictionary::~HybridDictionary()
 {
   delete static_dic;
   delete dynamic_dic;
 }
 
-
-
-
-// ============= Create hybrid dictionary ==============
-
+// Create hybrid dictionary 
 DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary *static_dic,
                                           std::string &errorMessage)
 {
@@ -213,7 +216,7 @@ DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary
 
   {
     string collation_def;
-    bool success = static_dic->getProperty( "char-precedence", collation_def );
+    bool success = static_dic->getProperty("char-precedence", collation_def);
 
     if(success) {
       success = dynamic_dic->setProperty("collation", collation_def.c_str());
@@ -302,7 +305,6 @@ const char *HybridDictionary::getFileName()
   return dynamic_dic->getFileName();
 }
 
-
 bool HybridDictionary::getProperty(const char *propertyName, std::string &propertyValue)
 {
   bool res = dynamic_dic->getProperty(propertyName, propertyValue);
@@ -325,11 +327,13 @@ const char *HybridDictionary::getErrorMessage()
 
 // ============= Editing ==============
 
+// Insert an entry to the dynamic dictionary
 DictionaryIteratorPtr HybridDictionary::insertEntry(const char *keyword)
 {
   return dynamic_dic->insertEntry(keyword);
 }
 
+// Updates an entry to the dynamic dictionary, creates it if it doesn't exist
 bool HybridDictionary::updateEntry(const DictionaryIteratorPtr &entry, const char *description)
 {
   bool matches;
@@ -343,8 +347,8 @@ bool HybridDictionary::updateEntry(const DictionaryIteratorPtr &entry, const cha
   return dynamic_dic->updateEntry(placeHolder, description);
 }
 
+// Removes the entry from the dynamic dictionary
 bool HybridDictionary::removeEntry(const DictionaryIteratorPtr &entry)
 {
   return dynamic_dic->removeEntry(entry);
 }
-

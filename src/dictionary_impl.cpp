@@ -155,7 +155,7 @@ const std::string &DictImpl::getFileName() const
 
 bool DictImpl::findEntry(const std::string &w, bool &subword)
 {
-  long b, e, m;
+  long b, e;
   bool found;
   CanonizedWord cw;
 
@@ -188,7 +188,7 @@ bool DictImpl::findEntry(const std::string &w, bool &subword)
   while(b < e)
   {
     // operation on unsiged numbers to save one more bit
-    m = (long)(((unsigned long)b+(unsigned long)e)/2);
+    long m = (long)(((unsigned long)b+(unsigned long)e)/2);
     m = findPrev(m);
     if((m < 0) || !readEntry(m))
     {
@@ -582,15 +582,14 @@ int DictImpl::readProperties()
   ns = properties["index"];
 // printf("index=%s\n", ns.c_str() + 1);
 
-  int i, n;
-  n = 0;
+  int n = 0;
   do {
-    i = ns.find((char) 0, n+1);
+    int i = ns.find((char) 0, n+1);
     if(i < 0) {
       i = ns.size();
     }
 
-    if (i == n) {
+    if(i == n) {
       break;
     }
 
@@ -656,7 +655,8 @@ int DictImpl::getLine(std::string &line, int &pos)
   return line.size();
 }
 
-bool DictImpl::checkIntegrity() {
+bool DictImpl::checkIntegrity()
+{
 
   // first check if the last character in the file is zero or
   // the last two characters are 0 and 10. This is because most

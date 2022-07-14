@@ -23,16 +23,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <stdio.h>
+
 #include "bedic.h"
 #include "dictionary.h"
-
-#include <stdio.h>
 
 extern char terminal_keyword[];
 
 class BedicDictionaryIterator;
 
-class BedicDictionary: public StaticDictionary
+class BedicDictionary : public StaticDictionary
 {
   friend class BedicDictionaryIterator;
   friend StaticDictionary *loadBedicDictionary(const char *filename, bool doCheckIntegrity,
@@ -70,6 +70,7 @@ class BedicDictionaryIterator : public DictionaryIterator
 {
   Dictionary *dic;
   bool lastEntry;
+
 public:
   BedicDictionaryIterator(Dictionary *dic, bool lastEntry) :
                                            dic(dic), lastEntry(lastEntry)
@@ -101,6 +102,7 @@ public:
     if(!moved) {
       lastEntry = true;
     }
+
     if(dic->getError() != "")
       return false;
     else
@@ -184,4 +186,3 @@ StaticDictionary *loadBedicDictionary(const char *filename, bool doCheckIntegrit
 
   return new BedicDictionary(dic);
 }
-
