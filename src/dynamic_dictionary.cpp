@@ -62,8 +62,16 @@ class SQLiteDictionary: public DynamicDictionary
   CollationComparator collationComparator;
 
 protected:
-  explicit SQLiteDictionary(const char *fileName);
+  /**
+   * Constructor
+   * @param fname    Filename
+   */
+  explicit SQLiteDictionary(const char *fname);
 
+  /**
+   * A dictionary can only be bound if it has id and collation properties,
+   * search-ignore-chars also needs to be set
+   */
   bool bind();
 
   bool findNext(const char *keyword, std::string &next, bool or_same);
@@ -107,8 +115,8 @@ class SQLiteDictionaryIterator : public DictionaryIterator
   std::string keyword, description;
 
 public:
-  SQLiteDictionaryIterator(SQLiteDictionary *dic, const char *keyword) : dic(dic),
-                                                                         keyword(keyword)
+  SQLiteDictionaryIterator(SQLiteDictionary *dic, const char *kword) : dic(dic),
+                                                                       keyword(kword)
   {
   }
 
@@ -130,12 +138,12 @@ public:
     if(db == NULL) return NULL;
 
     sqlite3_stmt *stmt = dic->getStmt(S_GET_DESCRIPTION);
-    if( stmt == NULL ) return NULL;
+    if(stmt == NULL) return NULL;
 
     sqlite3_bind_text(stmt, 1, keyword.c_str(), keyword.size(), SQLITE_TRANSIENT);
     int rc = sqlite3_step(stmt);
     if(rc == SQLITE_ROW) {
-      const char *str = (const char*)sqlite3_column_text(stmt, 0);
+      const char *str = (const char *)sqlite3_column_text(stmt, 0);
       description = str != NULL ? str : "";
     } else {
       dic->errorString = std::string(sqlite3_errmsg(db));
@@ -167,27 +175,27 @@ public:
 //============== Constructor / destructor  ==============
 
 
-SQLiteDictionary::SQLiteDictionary(const char *fileName) : fileName(fileName), _db(NULL)
+SQLiteDictionary::SQLiteDictionary(const char *fname) : fileName(fname), _db(nullptr)
 {
   memset(statement, 0, sizeof(sqlite3_stmt*)*S_COUNT);
 }
 
 SQLiteDictionary::~SQLiteDictionary()
 {
-  if(_db != NULL) sqlite3_close(_db);
+  if(_db != nullptr) sqlite3_close(_db);
 }
 
 //============== DB Utils ==============
 
 sqlite3 *SQLiteDictionary::getDB()
 {
-  if(_db == NULL) {
+  if(_db == nullptr) {
     int rc;
     rc = sqlite3_open(fileName.c_str(), &_db);
     if(rc != SQLITE_OK) {
-      if(_db != NULL)
+      if(_db != nullptr)
         errorString = sqlite3_errmsg(_db);
-      return NULL;
+      return nullptr;
     }
     sqlite3_create_collation(_db, "bedic", SQLITE_UTF8, &(this->collationComparator), compare_callback);
   }
@@ -216,18 +224,18 @@ static const char *statement_sql[S_COUNT] = {
 sqlite3_stmt *SQLiteDictionary::getStmt(StmtID stmt_id)
 {
   sqlite3 *db = getDB();
-  if(db == NULL) return NULL;
+  if(db == nullptr) return nullptr;
   
-  if(statement[stmt_id] != NULL) {
+  if(statement[stmt_id] != nullptr) {
     return statement[stmt_id];
   } else {
     sqlite3_stmt *new_stmt;
     int rc = sqlite3_prepare(db, statement_sql[stmt_id], strlen(statement_sql[stmt_id]),
-      &new_stmt, NULL);
+                             &new_stmt, nullptr);
     statement[stmt_id] = new_stmt;
     if(rc != SQLITE_OK) {
       errorString = std::string(sqlite3_errmsg(db)) + " (SQL: " + statement_sql[stmt_id] + ")";
-      return NULL;
+      return nullptr;
     }
     return new_stmt;
   }
@@ -246,7 +254,8 @@ bool SQLiteDictionary::bind()
 
 //  sqlite3_exec( _db, "reindex bedic", NULL, NULL, NULL );
 
-  return true;   // TODO check if search-ignore-chars is optional
+  return true;   // FIXME search-ignore-chars is optional, but appears to 
+                 //       be non-optional as you can't set the collation without it
 }
 
 //=============================
@@ -280,26 +289,26 @@ DynamicDictionary *createSQLiteDictionary(const char *fileName, const char *name
   sqlite3 *db;
   rc = sqlite3_open(fileName, &db);
   if(rc != SQLITE_OK) {
-    if(db != NULL) {
+    if(db != nullptr) {
       errorMessage = sqlite3_errmsg(db);
       sqlite3_close(db);
     }
-    return NULL;
+    return nullptr;
   }
 
   // initialize collation, so create table does not fail
   sqlite3_create_collation(db, "bedic", SQLITE_UTF8, NULL, compare_callback);
 
   // create tables
-  char *errmsg = NULL;
+  char *errmsg = nullptr;
   rc = sqlite3_exec(db, database_schema, NULL, NULL, &errmsg);
   if(rc != SQLITE_OK) {
-    if(errmsg != NULL) {
+    if(errmsg != nullptr) {
       errorMessage = errmsg;
       sqlite3_free( errmsg );
     }
     sqlite3_close(db);
-    return NULL;
+    return nullptr;
   }
 
   sqlite3_close(db);
@@ -351,7 +360,7 @@ DynamicDictionary *loadSQLiteDictionary(const char *fileName, std::string &error
     FILE *fh = fopen(fileName, "rb");
     if(fh == NULL) {
       errorMessage = "File does not exists";
-      return NULL;
+      return nullptr;
     }
     fclose(fh);
   }
@@ -360,7 +369,7 @@ DynamicDictionary *loadSQLiteDictionary(const char *fileName, std::string &error
   if(!dic->bind()) {
     errorMessage = dic->getErrorMessage();
     delete dic;
-    return NULL;
+    return nullptr;
   }
   return dic;
 }
@@ -438,10 +447,10 @@ const char *SQLiteDictionary::getErrorMessage()
 bool SQLiteDictionary::getProperty(const char *propertyName, std::string &propertyValue)
 {
   sqlite3 *db = getDB();
-  if(db == NULL) return false;
+  if(db == nullptr) return false;
 
   sqlite3_stmt *stmt = getStmt(S_GET_PROPERTY);
-  if(stmt == NULL) return false;
+  if(stmt == nullptr) return false;
   
   sqlite3_bind_text(stmt, 1, propertyName, strlen(propertyName), SQLITE_TRANSIENT);
   if(sqlite3_step( stmt ) == SQLITE_ROW) {
@@ -455,10 +464,10 @@ bool SQLiteDictionary::getProperty(const char *propertyName, std::string &proper
 bool SQLiteDictionary::setProperty(const char *propertyName, const char *propertyValue)
 {
   sqlite3 *db = getDB();
-  if(db == NULL) return false;
+  if(db == nullptr) return false;
 
   sqlite3_stmt *stmt = getStmt(S_SET_PROPERTY);
-  if(stmt == NULL) return false;
+  if(stmt == nullptr) return false;
 
   int rc;
   sqlite3_bind_text(stmt, 1, propertyName, strlen(propertyName), SQLITE_TRANSIENT);
@@ -479,18 +488,18 @@ bool SQLiteDictionary::setProperty(const char *propertyName, const char *propert
 DictionaryIteratorPtr SQLiteDictionary::insertEntry(const char *keyword)
 {
   sqlite3 *db = getDB();
-  if(db == NULL) return DictionaryIteratorPtr(NULL);
+  if(db == nullptr) return DictionaryIteratorPtr(NULL);
 
   sqlite3_stmt *stmt = getStmt(S_INSERT_ENTRY);
-  if(stmt == NULL) return DictionaryIteratorPtr(NULL);
+  if(stmt == nullptr) return DictionaryIteratorPtr(NULL);
 
   sqlite3_bind_text(stmt, 1, keyword, strlen(keyword), SQLITE_TRANSIENT);
-  int create_time = (int)time( NULL );
+  int create_time = (int)time(NULL);
   sqlite3_bind_int(stmt, 2, create_time);
   if(sqlite3_step(stmt) != SQLITE_DONE) {
     errorString = std::string(sqlite3_errmsg(db));
     sqlite3_reset(stmt);
-    return DictionaryIteratorPtr(NULL);
+    return DictionaryIteratorPtr(nullptr);
   }
   sqlite3_reset(stmt);
 
@@ -503,10 +512,10 @@ bool SQLiteDictionary::updateEntry(const DictionaryIteratorPtr &entry, const cha
     return false;
 
   sqlite3 *db = getDB();
-  if(db == NULL) return false;
+  if(db == nullptr) return false;
 
   sqlite3_stmt *stmt = getStmt(S_UPDATE_ENTRY);
-  if(stmt == NULL) return false;
+  if(stmt == nullptr) return false;
 
   sqlite3_bind_text(stmt, 1, entry->getKeyword(), strlen(entry->getKeyword()), SQLITE_TRANSIENT);
   sqlite3_bind_text(stmt, 2, description, strlen(description), SQLITE_TRANSIENT);
@@ -528,10 +537,10 @@ bool SQLiteDictionary::removeEntry(const DictionaryIteratorPtr &entry)
     return false;
 
   sqlite3 *db = getDB();
-  if(db == NULL) return false;
+  if(db == nullptr) return false;
 
   sqlite3_stmt *stmt = getStmt(S_REMOVE_ENTRY);
-  if(stmt == NULL) return false;
+  if(stmt == nullptr) return false;
 
   sqlite3_bind_text(stmt, 1, entry->getKeyword(), strlen(entry->getKeyword()), SQLITE_TRANSIENT);
   if(sqlite3_step(stmt) != SQLITE_DONE) {
@@ -552,8 +561,8 @@ static int compare_callback(void *collationPtr, int len1, const void *s1, int le
 {
   CanonizedWord w1(15), w2(15);
   CollationComparator *comparator = static_cast<CollationComparator *>(collationPtr);
-  w1 = comparator->canonizeWord(string((char*)s1, len1));
-  w2 = comparator->canonizeWord(string((char*)s2, len2));
+  w1 = comparator->canonizeWord(std::string((char *)s1, len1));
+  w2 = comparator->canonizeWord(std::string((char *)s2, len2));
   return comparator->compare(w1, w2);
 }
 

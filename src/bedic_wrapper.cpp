@@ -32,6 +32,9 @@ extern char terminal_keyword[];
 
 class BedicDictionaryIterator;
 
+/**
+ * Wrapper for the Dictionary class
+ */
 class BedicDictionary : public StaticDictionary
 {
   friend class BedicDictionaryIterator;

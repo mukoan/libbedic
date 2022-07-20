@@ -18,8 +18,8 @@
  ****************************************************************************/
 
 #pragma once
-#ifndef _UTF8_H
-#define _UTF8_H
+#ifndef UTF8_H
+#define UTF8_H
 
 #include <string>
 
@@ -37,5 +37,5 @@ public:
   static unsigned int runetoupper(unsigned int c);
 };
 
-#endif  /* _UTF8_H */
+#endif  /* UTF8_H */
 

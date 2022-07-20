@@ -26,8 +26,6 @@
 
 #include <string>
 
-using namespace std;
-
 class SHCM {
 public:
   virtual void startDecode(const std::string &tree) = 0;

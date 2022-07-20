@@ -54,7 +54,7 @@ class XeroxException: public std::exception
   std::string message;
 
 public:
-  explicit XeroxException(const char *message) : message(message)
+  explicit XeroxException(const char *reason) : message(reason)
   {
   }
 
@@ -66,7 +66,6 @@ public:
   {
     return message.c_str();
   }
-  
 };
 
 // ==================================================================
@@ -75,7 +74,7 @@ public:
 
 struct entry_type {
   static CollationComparator *currentDict;
-  string word;
+  std:: string word;
   CanonizedWord canonizedWord;
   int fidx;
   int pos;
@@ -262,7 +261,7 @@ bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
           if(find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
             continue;
           // Character missing both in ignoreChars and precedence list
-          std::cerr << WARNING_MSG << "character '" << string(t, (s-t)) <<
+          std::cerr << WARNING_MSG << "character '" << std::string(t, (s-t)) <<
             "' is missing both in search-ignore-chars and char-precedence\n";
         }
       }
@@ -449,7 +448,7 @@ int collate_compare(const void *va, const void *vb)
 
 //struct CollateCmp: public binary_function< const char*, const char*, int >
 
-struct CollateCmp : public binary_function<std::string,std::string,bool>
+struct CollateCmp : public std::binary_function<std::string,std::string,bool>
 {
   bool operator()(const std::string &x, const std::string &y) const
   {
@@ -481,7 +480,7 @@ std::vector<std::string> XeroxDict::findAllCharacters(void)
       strncpy(letter, (char*)cBeg, len);
       letter[len]=0;
       if(foundLetters.find(letter) == foundLetters.end()) {
-        foundLetters.insert(string(letter));
+        foundLetters.insert(std::string(letter));
 //        fprintf( stderr, "%s: %s\n", w.c_str(), letter );
       }
       cBeg = cEnd;

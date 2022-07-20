@@ -934,7 +934,7 @@ static unsigned int *bsearch(unsigned int c, unsigned int *t,
     return t;
   }
 
-  return 0;
+  return nullptr;
 }
 
 static unsigned int runetolower(unsigned int c)

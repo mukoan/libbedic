@@ -56,7 +56,7 @@ class XeroxException : public std::exception
   std::string message;
 
 public:
-  explicit XeroxException(const char *message) : message(message)
+  explicit XeroxException(const char *reason) : message(reason)
   {
   }
 
@@ -149,7 +149,7 @@ public:
           if(charPrecedence.find(rune) != charPrecedence.end())
             continue;
 
-          if(find(ignoreChars.begin(), ignoreChars.end(), string(t, (s-t))) != ignoreChars.end())
+          if(find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
             continue;
           // Character missing both in ignoreChars and precedence list
           std::cerr << WARNING_MSG << "character '" << std::string(t, (s-t)) <<
@@ -231,7 +231,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
     n += entries[i].len;
   }
 
-  string idx;
+  std::string idx;
   n = -32769;
   char *ibuf = new char [mwl+32];
   for(unsigned int i = 0; i < entries.size() - 1; i++) {
@@ -589,7 +589,7 @@ int main(int argc, char **argv)
 
       if(headerFile != NULL) {
         FILE *fhHeader;
-        if(!strcmp( headerFile, "-") )
+        if(!strcmp( headerFile, "-"))
           fhHeader = stdin;
         else
           fhHeader = fopen(headerFile, "r");

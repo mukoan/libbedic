@@ -22,8 +22,8 @@
  */
 
 #pragma once
-#ifndef _BEDIC_H
-#define _BEDIC_H
+#ifndef BEDIC_H
+#define BEDIC_H
 
 #include <string.h>
 #include <stdio.h>
@@ -38,52 +38,55 @@ class CollationComparator;
 template <class X> class OwnedPtr
 {
 public:
-    typedef X element_type;
+  typedef X element_type;
 
-    explicit OwnedPtr(X* p=0)       : itsOwn(p!=0), itsPtr(p) {}
-    ~OwnedPtr() {
-      if (itsOwn) {
-        delete itsPtr;
-      }
+  explicit OwnedPtr(X *p = 0) : itsOwn(p != 0), itsPtr(p) {}
+  ~OwnedPtr() {
+    if(itsOwn) {
+      delete itsPtr;
     }
-    OwnedPtr(const OwnedPtr& r) 
-        : itsOwn(r.itsOwn), itsPtr(r.release()) {}
-    OwnedPtr& operator=(const OwnedPtr& r) 
-    {
-        if (&r != this) {
-            if (itsPtr != r.itsPtr) {
-                if (itsOwn) delete itsPtr;
-                itsOwn = r.itsOwn;
-            }
-            else if (r.itsOwn) itsOwn = true;
-            itsPtr = r.release();
-        }
-        return *this;
+  }
+
+  OwnedPtr(const OwnedPtr &r) 
+      : itsOwn(r.itsOwn), itsPtr(r.release()) {}
+
+  OwnedPtr &operator=(const OwnedPtr &r) 
+  {
+    if(&r != this) {
+      if(itsPtr != r.itsPtr) {
+        if(itsOwn) delete itsPtr;
+        itsOwn = r.itsOwn;
+      }
+      else if(r.itsOwn) itsOwn = true;
+        itsPtr = r.release();
     }
 
-    bool operator==( const OwnedPtr &x ) const
-      {
-        return *(itsPtr) == *(x.itsPtr);
-      }
+    return *this;
+  }
 
-    bool operator!=( const OwnedPtr &x ) const
-      {
-        return *(itsPtr) != *(x.itsPtr);
-      }
+  bool operator==(const OwnedPtr &x) const
+  {
+    return *(itsPtr) == *(x.itsPtr);
+  }
 
-    bool isValid() const
-      {
-        return itsPtr != NULL;
-      }
+  bool operator!=(const OwnedPtr &x) const
+  {
+    return *(itsPtr) != *(x.itsPtr);
+  }
 
-    X& operator*()  const            {return *itsPtr;}
-    X* operator->() const            {return itsPtr;}
-    X* get()        const            {return itsPtr;}
-    X* release()    const  {itsOwn = false; return itsPtr;}
+  bool isValid() const
+  {
+    return itsPtr != NULL;
+  }
+
+  X &operator*()  const            { return *itsPtr; }
+  X *operator->() const            { return itsPtr; }
+  X *get()        const            { return itsPtr; }
+  X *release()    const  { itsOwn = false; return itsPtr; }
 
 private:
-    mutable bool itsOwn;
-    X* itsPtr;
+  mutable bool itsOwn;
+  X *itsPtr;
 };
 
 class DictionaryIterator
@@ -104,11 +107,11 @@ public:
     return strcmp(getKeyword(), x.getKeyword()) == 0;
   }
 
-  bool operator!=(DictionaryIterator &x) 
+  bool operator!=(DictionaryIterator &x)
   {
     return strcmp(getKeyword(), x.getKeyword()) != 0;
   }
-  
+
 };
 
 typedef OwnedPtr<DictionaryIterator> DictionaryIteratorPtr;
@@ -140,7 +143,7 @@ public:
   virtual CollationComparator *getCollationComparator()
   {
     return nullptr;
-  }  
+  }
   
   /**
    * Check if the dictionary can be casted to DynamicDictionary
@@ -163,8 +166,8 @@ public:
   // Static members
 
   static StaticDictionary *loadDictionary(const char *filename, bool doCheckIntegrity,
-                                          std::string &errorMessage );
-  
+                                          std::string &errorMessage);
+
 };
 
 class DynamicDictionary : public StaticDictionary
@@ -188,11 +191,11 @@ public:
 };
 
 DynamicDictionary *createSQLiteDictionary(const char *fileName, const char *name,
-                                          std::string &errorMessage );
+                                          std::string &errorMessage);
 DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary *static_dic,
                                           std::string &errorMessage);
 
 std::string formatDicEntry(std::string entry);
 
-#endif  /* _BEDIC_H */
+#endif  /* BEDIC_H */
 

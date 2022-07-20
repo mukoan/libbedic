@@ -26,8 +26,6 @@
 #include "shcm.h"
 #include "shc.h"
 
-using namespace std;
-
 class SHCMImpl : public SHCM
 {
 public:
@@ -40,8 +38,8 @@ public:
   virtual std::string endPreEncode();
 
   virtual void preencode(const std::string &s);
-  virtual string encode(const std::string &s);
-  virtual string decode(const std::string &s);
+  virtual std::string encode(const std::string &s);
+  virtual std::string decode(const std::string &s);
 
 protected:
   uint32 *freq;
@@ -85,7 +83,7 @@ void SHCMImpl::startPreEncode()
   }
 }
 
-string SHCMImpl::endPreEncode()
+std::string SHCMImpl::endPreEncode()
 {
   int n;
 
@@ -98,7 +96,7 @@ string SHCMImpl::endPreEncode()
 
   initialized = true;
 
-  string ret;
+  std::string ret;
 
   for(int i = 0; i < tree_len; i++) {
     ret.push_back((char) tree[i] & 0xFF);
@@ -147,7 +145,7 @@ void SHCMImpl::preencode(const std::string &s)
   }
 }
 
-string SHCMImpl::encode(const std::string &s)
+std::string SHCMImpl::encode(const std::string &s)
 {
   unsigned int i, bits;
   uint32 bitbuf;
@@ -232,7 +230,7 @@ std::string SHCMImpl::decode(const std::string &ss)
 
   s.push_back(0);
 
-  bits=31;
+  bits   = 31;
   bufpos = 0;
   bitbuf = s[bufpos++];
 

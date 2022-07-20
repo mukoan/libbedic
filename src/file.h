@@ -52,7 +52,7 @@ protected:
   int   outbuflen;
   int   outbufsize;
   char *outbuf;
-  int   cchunk;      //< current chunk
+  int   cchunk;      ///< current chunk
 };
 
 #endif  /* FILE_H */

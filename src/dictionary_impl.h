@@ -1,6 +1,6 @@
 /**
  * @file   dictionary_impl.h
- * @brief  
+ * @brief  Dictionary class implementation
  * @author Lyndon Hill and others
  *
  * Copyright (C) 2002 Latchesar Ionkov <lionkov@yahoo.com>
@@ -24,6 +24,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#pragma once
 #ifndef DICTIONARY_IMPL_H
 #define DICTIONARY_IMPL_H
 
@@ -44,43 +45,38 @@
  *
  *    1. Header
  *       The header contains a collection of property values.
- *   All data in the header is encoded using UTF-8.
+ *       All data in the header is encoded using UTF-8.
  *
- *   The format of a line of the header is:
- *     <name> '=' <value>
+ *       The format of a line of the header is:
+ *       <name> '=' <value>
  *
- *   Currently defined properties:
- *    - name      required
- *      the name of the database (as will be
- *       shown to the user)
+ *       Currently defined properties:
+ *       - name      required
+ *           The name of the database (as will be shown to the user)
  *
- *    - search-ignore-chars  optional (default: empty)
- *      list of the characters that will be 
- *      ignored while doing search
+ *       - search-ignore-chars  optional (default: empty)
+ *           List of the characters that will be ignored while doing search
  *
- *     - max-word-length  optional (default: 50)
- *      Maximum length of the word entry
+ *       - max-word-length  optional (default: 50)
+ *           Maximum length of the word entry
  *
- *    - max-entry-length  optional (default: 8192)
- *      maximum length of database entry
+ *       - max-entry-length  optional (default: 8192)
+ *           Maximum length of database entry
  *
- *   The header ends with '\0' character.
+ *       The header ends with '\0' character.
  *
  *    2. Data
  *
- *   The data section of the dictionary contains
- *   variable-size entries. Every entry defines
- *   a single word and (all) its meanings.
- *   The entries in the database are sorted. The
- *   comparision while sorting ignores the character
- *    case and the characters that should be ignored
- *    (see search-ignore-chars)
+ *       The data section of the dictionary contains variable-size entries.
+ *       Every entry defines a single word and (all) its meanings. The entries
+ *       in the database are sorted. The comparision while sorting ignores the
+ *       character case and the characters that should be ignored (see
+ *       search-ignore-chars)
  *
- *   The entry contains two values: word and sense.
- *   Both are variable-size, the delimiter between them
- *   is an '\n' character.
+ *       The entry contains two values: word and sense.
+ *       Both are variable-size, the delimiter between them is an '\n' character.
  *
- *   The entry ends with '\0' character.
+ *       The entry ends with '\0' character.
  *
  * The class uses binary search to find a word.
  * It creates an index to improve the searches.
@@ -95,7 +91,7 @@ class CollationComparator
 {
 protected:
   std::vector<std::string> ignoreChars;
-  std::map<int, int> charPrecedence; // To build lexical precedence
+  std::map<int, int> charPrecedence;     // To build lexical precedence
   std::vector<int> precedenceGroups;
   bool useCharPrecedence;
   int charPrecedenceUnknown;
@@ -105,23 +101,22 @@ public:
 
   /**
    * Compares two words
+   * The words should be put in canonical form before this method is called
    *
-   * The words should be put in cannonical form
-   * before this method is called
+   * @param s1  The first word
+   * @param s2  The second word
+   * @return  the usual comparison value
    */
   int compare(const CanonizedWord &s1, const CanonizedWord &s2);
 
   /**
-   * Puts a string in canonized form ready for
-   * comparision.
+   * Puts a string in canonized form ready for * comparision.
    *
    * All the characters in the word are upper-cased.
-   * All the characters that should be ignored are
-   * removed.
+   * All the characters that should be ignored are removed.
    *
-   * @param s the word to canonize
-   *
-   * @return cannonical form of the word
+   * @param s   The word to canonize
+   * @return  canonical form of the word
    */
   CanonizedWord canonizeWord(const std::string &s);
 };
@@ -148,8 +143,7 @@ public:
   /**
    * Returns dictionary name
    *
-   * @return name of the dictionary as set in the 
-   * dictionary properties header
+   * @return  name of the dictionary as set in the dictionary properties header
    */
   virtual const std::string &getName() const;
 
@@ -161,31 +155,26 @@ public:
   /**
    * Looks for a word in the dictionary
    *
-   * Sets the internal dictionary state to point to a
-   * word equal or greater (in lexicographical terms)
-   * to the one specified as parameter.
+   * Sets the internal dictionary state to point to a word equal or greater
+   * (in lexicographical terms) to the one specified as parameter.
    *
-   * Before two words are compared, the are canonized.
-   * I.e. the characters specified in search-ignore-chars 
-   * property are removed and both words are set 
-   * to uppercase.
+   * Before two words are compared, the are canonized. i.e. the characters
+   * specified in search-ignore-chars property are removed and both words are
+   * set to uppercase.
    *
-   * Parameter subword is set to true if the word the
-   * dictionary points to starts with the word specified
-   * as a parameter.
+   * Parameter subword is set to true if the word the dictionary points to
+   * starts with the word specified as a parameter.
    *
-   * @param word word to look for
-   * @param subword flag if word is subword
+   * @param word     Word to look for
+   * @param subword  Flag if word is subword
    *
-   * @return true if exact match is found
+   * @return  true if exact match is found
    */
   virtual bool findEntry(const std::string &word, bool &subword);
 
   /**
    * Moves the internal word pointer to the next word.
-   *
-   * If the pointer is set to the last word, it is 
-   * not changed.
+   * If the pointer is set to the last word, it is not changed.
    * 
    * @return true if the pointer is moved
    */
@@ -206,8 +195,7 @@ public:
   virtual bool lastEntry();
 
   /**
-   * Moves the internal word pointer to randomly chosen
-   * entry.
+   * Moves the internal word pointer to randomly chosen entry.
    * 
    * @return true if the word is read successfully
    */
@@ -221,8 +209,7 @@ public:
   virtual const std::string &getWord() const;
 
   /**
-   * Returns the sense of the word pointer by the 
-   * internal word pointer
+   * Returns the sense of the word pointer by the internal word pointer
    *
    * @return sense
    */
@@ -241,17 +228,18 @@ public:
    * Returns property from the header of the dictionary file. See
    * bedic-format.txt for the description of available properties.
    *
-   * @return property value
+   * @param key  Name of property
+   * @return  property value
    */
-  virtual const std::string &getProperty( const char *name ) {
-    return properties[name];
+  virtual const std::string &getProperty(const char *key) {
+    return properties[key];
   }
 
   /**
    * Check integrity of the dictionary file.
    *
-   * @return true if integrity check is succesfull -
-   * dictionary file is not corrupted.
+   * @return  true if integrity check is succesfull - dictionary file is not
+   *          corrupted.
    */
   bool checkIntegrity();
 
@@ -260,63 +248,64 @@ protected:
   /**
    * This structure represent an index entry
    *
-   * It contains canonized word value and the position
-   * of that value
+   * It contains canonized word value and the position of that value
    */
   struct IndexEntry
   {
     CanonizedWord word;
     long pos;
 
-    IndexEntry(const CanonizedWord &w, long p) : word(w), pos(p) {
-    }
+    IndexEntry(const CanonizedWord &w, long p) : word(w), pos(p) { }
   };
 
-  // file descriptor to the dictionary file
+  /// File descriptor to the dictionary file
   File *fdata;
 
-  // position of the first entry
+  /// Position of the first entry
   long firstEntryPos;
 
-  // position of the last entry
+  /// Position of the last entry
   long lastEntryPos;
 
-  // error description
+  /// Error description
   std::string errorDescr;
 
-  // properties (see the class overall documentation)
+  /// Properties (see the class overall documentation)
   std::string name;
   std::string fileName;
   int maxWordLength;
   int maxEntryLength;
 
-  // general purpose buffer
+  /// General purpose buffer
   char *buf;
 
-  // current word
+  /// Current word
   std::string currWord;
 
-  // the sense of the current word
+  /// The sense of the current word
   mutable std::string currSense;
+
+  /// Senses are compressed using the SHC compressor
   mutable bool senseCompressed;
 
-  // current position
+  /// Current position
   long currPos;
 
-  // next position, or -1 if not defined
+  /// Next position, or -1 if not defined
   long nextPos;
 
-  // index table
+  /// Index table
   std::vector<IndexEntry> index;
 
-  // property values
+  /// Property values
   std::map<std::string, std::string> properties;
 
+  /// The SHC compressor
   SHCM *compressor;
 
+  /// Set an error description
   void setError(const std::string &err) {
     errorDescr = err; 
-//  printf("Error: %s\n", (const char*) errorDescr.utf8());
   }
 
   /**
@@ -370,7 +359,7 @@ protected:
    * the last entry, the position of the last entry is
    * returned.
    *
-   * @param position to start scaning backward from
+   * @param pos   position to start scanning backward from
    *
    * @return start position of an entry
    */
@@ -386,7 +375,7 @@ protected:
    * the last entry, the position of the last entry is
    * returned.
    *
-   * @param position
+   * @param pos
    *
    * @return start position of an entry
    */
@@ -405,10 +394,10 @@ protected:
   void bsearchIndex(const CanonizedWord &s, long &b, long &e);
 
 
-  // entry delimiter character
+  // Entry delimiter character
   static const char DATA_DELIMITER;
 
-  // word delimiter character
+  // Word delimiter character
   static const char WORD_DELIMITER;
 
 public:

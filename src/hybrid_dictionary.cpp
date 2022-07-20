@@ -215,7 +215,7 @@ DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary
     return NULL;
 
   {
-    string collation_def;
+    std::string collation_def;
     bool success = static_dic->getProperty("char-precedence", collation_def);
 
     if(success) {
@@ -230,7 +230,7 @@ DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary
 
 
   {
-    string ignore_def;
+    std::string ignore_def;
     bool success = static_dic->getProperty("search-ignore-chars", ignore_def);
 
     if(success) {
