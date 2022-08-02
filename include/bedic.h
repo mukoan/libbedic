@@ -28,6 +28,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <memory>
 #include <string>
 
 class CollationComparator;
@@ -38,57 +39,67 @@ class CollationComparator;
 template <class X> class OwnedPtr
 {
 public:
-  typedef X element_type;
-
+  /// Constructor
   explicit OwnedPtr(X *p = 0) : itsOwn(p != 0), itsPtr(p) {}
+
+  /// Destructor - deletes the pointed at memory
   ~OwnedPtr() {
     if(itsOwn) {
       delete itsPtr;
     }
   }
 
+  /// Constructor - copies the pointer and takes it over
   OwnedPtr(const OwnedPtr &r) 
       : itsOwn(r.itsOwn), itsPtr(r.release()) {}
 
+  /// Assignment operator
   OwnedPtr &operator=(const OwnedPtr &r) 
   {
-    if(&r != this) {
-      if(itsPtr != r.itsPtr) {
+    if(&r != this)
+    {
+      if(itsPtr != r.itsPtr)
+      {
         if(itsOwn) delete itsPtr;
         itsOwn = r.itsOwn;
       }
       else if(r.itsOwn) itsOwn = true;
-        itsPtr = r.release();
+
+      itsPtr = r.release();
     }
 
     return *this;
   }
 
+  /// Check the data pointed at is the same
   bool operator==(const OwnedPtr &x) const
   {
     return *(itsPtr) == *(x.itsPtr);
   }
 
+  /// Check the data pointed at is different
   bool operator!=(const OwnedPtr &x) const
   {
     return *(itsPtr) != *(x.itsPtr);
   }
 
+  /// The data pointer is valid
   bool isValid() const
   {
-    return itsPtr != NULL;
+    return itsPtr != nullptr;
   }
 
-  X &operator*()  const            { return *itsPtr; }
-  X *operator->() const            { return itsPtr; }
-  X *get()        const            { return itsPtr; }
+  X &operator*()  const  { return *itsPtr; }
+  X *operator->() const  { return itsPtr; }
+  X *get()        const  { return itsPtr; }
   X *release()    const  { itsOwn = false; return itsPtr; }
 
 private:
-  mutable bool itsOwn;
-  X *itsPtr;
+  mutable bool itsOwn;   ///< The object owns the data pointer
+  X *itsPtr;             ///< The actual data pointer
 };
 
+/// An iterator to traverse a dictionary
 class DictionaryIterator
 {
 public:
@@ -102,7 +113,7 @@ public:
   virtual bool nextEntry() = 0;
   virtual bool previousEntry() = 0;
 
-  bool operator==(DictionaryIterator &x) 
+  bool operator==(DictionaryIterator &x)
   {
     return strcmp(getKeyword(), x.getKeyword()) == 0;
   }
@@ -115,6 +126,7 @@ public:
 };
 
 typedef OwnedPtr<DictionaryIterator> DictionaryIteratorPtr;
+// typedef std::unique_ptr<DictionaryIterator> DictionaryIteratorPtr;
 
 class StaticDictionary
 {
@@ -144,7 +156,7 @@ public:
   {
     return nullptr;
   }
-  
+
   /**
    * Check if the dictionary can be casted to DynamicDictionary
    * interface (qtopia does not allow for RTT).
@@ -162,7 +174,7 @@ public:
   {
     return false;
   }
-  
+
   // Static members
 
   static StaticDictionary *loadDictionary(const char *filename, bool doCheckIntegrity,

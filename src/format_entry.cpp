@@ -57,13 +57,12 @@ std::string formatDicEntry(std::string entry)
 
   int level = 0;
   int p = 0, ns = 0;
-  while(ns < (int)entry.size()) {
+  while(ns < (int)entry.size())
+  {
     int np = entry.find('{', ns);
     if(np == -1) break;
 
     bool doFormat = false, incLevel = false;
-
-//    std::cerr << "tag: " << entry.substr( np, 5 ) << "\n";
 
     // string::compare seems to malfunction in older libg++
 #ifdef ARCH_ARM

@@ -32,6 +32,7 @@ of this code should be considered GPL v2 unless individual files state otherwise
 
 # Changelog
 
+- 02.08.2022  Making code easier to read, documenting, fixing static analysis warnings
 - 20.07.2022  Another round of reformatting, documenting and fixing static analysis issues
 - 14.07.2022  Reformatting, documenting code
 - 06.07.2022  More reformatting and fixing static analysis warnings

@@ -393,7 +393,6 @@ protected:
    */
   void bsearchIndex(const CanonizedWord &s, long &b, long &e);
 
-
   // Entry delimiter character
   static const char DATA_DELIMITER;
 
@@ -401,7 +400,10 @@ protected:
   static const char WORD_DELIMITER;
 
 public:
+  /// Convert the string s to escape codes
   static std::string escape(const std::string &s);
+
+  /// Convert the string s to use delimiter characters
   static std::string unescape(const std::string &s);
 };
 

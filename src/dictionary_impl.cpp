@@ -65,9 +65,8 @@ Dictionary::~Dictionary()
 const char DictImpl::DATA_DELIMITER = '\x00';
 const char DictImpl::WORD_DELIMITER = '\n';
 
-DictImpl::DictImpl(const char *filename, bool doCheckIntegrity) : buf(nullptr)
+DictImpl::DictImpl(const char *filename, bool doCheckIntegrity) : fileName(filename), buf(nullptr)
 {
-  fileName   = filename;
   compressor = nullptr;
 
   if(strlen(filename) > 3 && strcmp(&filename[strlen(filename) - 3], ".dz") == 0)
@@ -117,18 +116,15 @@ DictImpl::DictImpl(const char *filename, bool doCheckIntegrity) : buf(nullptr)
   }
 
   // check the integrity
-  if(doCheckIntegrity) {
-    checkIntegrity();
-  }
+  if(doCheckIntegrity) checkIntegrity();
 
   nextPos = -1;
 }
 
 DictImpl::~DictImpl()
 {
-  if(buf) {
+  if(buf)
     delete [] buf;
-  }
 
   delete fdata;
 }
@@ -609,14 +605,14 @@ int DictImpl::readProperties()
 int DictImpl::getLine(std::string &line, int &pos)
 {
   char line_buf[90];
-  int i, n;
+  int i;
   int p;
 
   line.erase();
   p = pos;
   while(1)
   {
-    n = fdata->read(p, line_buf, sizeof(line_buf));
+    int n = fdata->read(p, line_buf, sizeof(line_buf));
     if(n < 0) {
       return 0;
     } else if(n == 0) {
@@ -789,30 +785,42 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
 {
   CanonizedWord::const_iterator it1 = s1.begin();
   CanonizedWord::const_iterator it2 = s2.begin();
-  if(useCharPrecedence) {
-    for( ;it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
+  if(useCharPrecedence)
+  {
+    for( ;it1 != s1.end() && it2 != s2.end(); ++it1, ++it2)
+    {
       // handle characters that are not defined in the collation string
       int ind1 = *it1 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it1;
       int ind2 = *it2 >= charPrecedenceUnknown ? charPrecedenceUnknown : *it2;
       if(precedenceGroups[ind1] < precedenceGroups[ind2]) return -1;
       if(precedenceGroups[ind1] > precedenceGroups[ind2]) return 1;
     }
-    if(it1 == s1.end() && it2 == s2.end()) {
-      for(it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
+
+    if(it1 == s1.end() && it2 == s2.end())
+    {
+      for(it1 = s1.begin(), it2 = s2.begin(); it1 != s1.end() && it2 != s2.end(); ++it1, ++it2)
+      {
         if(*it1 < *it2) return -1;
         if(*it1 > *it2) return 1;
       }
       return 0;
     }
+
     if(it1 == s1.end()) return -1;
+
     return 1;
-  } else {                      // No char precedence
-    for( ;it1 != s1.end() && it2 != s2.end(); ++it1, ++it2) {
+  }
+  else
+  {                      // No char precedence
+    for( ;it1 != s1.end() && it2 != s2.end(); ++it1, ++it2)
+    {
       if(*it1 < *it2) return -1;
       if(*it1 > *it2) return 1;
     }
+
     if(it1 == s1.end() && it2 == s2.end()) return 0;
     if(it1 == s1.end()) return -1;
+
     return 1;
   }
 }
@@ -820,55 +828,69 @@ int CollationComparator::compare(const CanonizedWord &s1, const CanonizedWord &s
 void CollationComparator::setCollation(const std::string &collationDef,
                                        const std::string &ic)
 {
-  int order = 0;
-  if(collationDef.size() != 0) {
-    const char *s;
-    s = collationDef.c_str();
+  if(collationDef.size() != 0)
+  {
+    int order = 0;
+
+    const char *s = collationDef.c_str();
+
     bool isGroup = false;
     int precGroup = 1;
-    while(*s != 0) {
+
+    while(*s != 0)
+    {
       int rune = Utf8::chartorune(&s);
+
       if(rune == 128) 
         break;
+
       if(rune == '{') {
         isGroup = true;
         continue;
       }
+
       if(rune == '}') {
         isGroup = false;
         precGroup++;
         continue;
       }
+
       charPrecedence[rune] = order++;
       precedenceGroups.push_back(precGroup);
+
       if(!isGroup)
         precGroup++;
     }
+
     precedenceGroups.push_back(precGroup++);
     charPrecedenceUnknown = order++;
-    { // Add terminal keyword
+
+    {
+      // Add terminal keyword
       const char *tk = (char *)(terminal_keyword);
       int rune = Utf8::chartorune(&tk);
       precedenceGroups.push_back(precGroup);
       charPrecedence[rune] = order;
     }
+
     useCharPrecedence = true;
 
 //     map<int,int>::iterator it = charPrecedence.begin();
 //     for( ; it != charPrecedence.end(); it++ ) {
 //       std::cout << it->first << " - " << it->second << " gr.: " << precedenceGroups[it->second] << "\n";
 //     }
-  } else
+  }
+  else
     useCharPrecedence = false;
   
-  const char *s, *t;
+  const char *s;
   s = ic.c_str();
 
-  while(*s != 0) {
-    t = s;
-    if(Utf8::chartorune(&s) == 128) {
+  while(*s != 0)
+  {
+    const char *t = s;
+    if(Utf8::chartorune(&s) == 128)
       break;
-    }
 
     ignoreChars.push_back(std::string(t, (s-t)));
   }

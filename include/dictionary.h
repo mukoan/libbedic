@@ -118,7 +118,7 @@ public:
   virtual const std::string &getWord() const = 0;
 
   /**
-   * Returns the sense of the word pointer by the * internal word pointer
+   * Returns the sense of the word pointer by the internal word pointer
    *
    * @return sense
    */

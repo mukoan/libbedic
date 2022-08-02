@@ -919,17 +919,21 @@ static unsigned int *bsearch(unsigned int c, unsigned int *t,
                              int n, int ne)
 {
   unsigned int *p;
-  int m;
 
-  while(n > 1) {
-    m = n/2;
+  while(n > 1)
+  {
+    int m = n/2;
     p = t + m*ne;
-    if(c >= p[0]) {
+
+    if(c >= p[0])
+    {
       t = p;
       n = n-m;
-    } else
+    }
+    else
       n = m;
   }
+
   if(n && c >= t[0]) {
     return t;
   }
@@ -964,7 +968,7 @@ unsigned int Utf8::runetoupper(unsigned int c)
   }
 
   p = bsearch(c, toupper1, nelem(toupper1) / 2, 2);
-  if (p && c == p[0]) {
+  if(p && c == p[0]) {
     return c + p[1] - 500;
   }
 
@@ -973,18 +977,17 @@ unsigned int Utf8::runetoupper(unsigned int c)
 
 int Utf8::tolower(const char *s, char *buf, int buflen)
 {
-  int i = 0;
   int j = 0;
 
   while(*s != 0 && buflen > 3) {
     unsigned int n = ::chartorune((char **) &s);
-    if (n == 128) {
+    if(n == 128) {
       return 0;
     }
 
     n = runetolower(n);
     
-    i = runetochar(buf, n);
+    int i = runetochar(buf, n);
     buf += i;
     j += i;
   }
@@ -995,18 +998,17 @@ int Utf8::tolower(const char *s, char *buf, int buflen)
 
 int Utf8::toupper(const char *s, char *buf, int buflen)
 {
-  int i = 0;
   int j = 0;
 
   while(*s != 0 && buflen > 3) {
-    unsigned int n = ::chartorune((char**) &s);
+    unsigned int n = ::chartorune((char **) &s);
     if(n == 128) {
       return 0;
     }
 
     n = runetoupper(n);
     
-    i = runetochar(buf, n);
+    int i = runetochar(buf, n);
     buf += i;
     j += i;
   }
@@ -1015,52 +1017,54 @@ int Utf8::toupper(const char *s, char *buf, int buflen)
   return j;
 }
 
-int Utf8::toupper(const std::string &str, std::string &result) {
-  int i = 0;
+int Utf8::toupper(const std::string &str, std::string &result)
+{
   const char *s = str.c_str();
   char buf[10];
 
   result.erase();
-  while (*s != 0) {
-    unsigned int n = ::chartorune((char**) &s);
-    if (n == 128) {
+  while(*s != 0) {
+    unsigned int n = ::chartorune((char **) &s);
+    if(n == 128) {
       return 0;
     }
 
     n = runetoupper(n);
 
-    i = runetochar(buf, n);
+    int i = runetochar(buf, n);
     result.append(buf, i);
   }
 
   return result.size();
 }
 
-int Utf8::tolower(const std::string &str, std::string &result) {
-  int i = 0;
-  const char* s = str.c_str();
+int Utf8::tolower(const std::string &str, std::string &result)
+{
+  const char *s = str.c_str();
   char buf[10];
 
   result.erase();
   while(*s != 0) {
-    unsigned int n = ::chartorune((char**) &s);
+    unsigned int n = ::chartorune((char **) &s);
     if(n == 128) {
       return 0;
     }
 
     n = runetolower(n);
-    
-    i = runetochar(buf, n);
+
+    int i = runetochar(buf, n);
     result.append(buf, i);
   }
 
   return result.size();
 }
 
-unsigned int Utf8::chartorune(const char **b) {
+unsigned int Utf8::chartorune(const char **b)
+{
   return ::chartorune((char**) b);
 }
 
-int Utf8::runetochar(char *b, int rune) {
+int Utf8::runetochar(char *b, int rune)
+{
   return ::runetochar(b, rune);
 }

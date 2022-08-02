@@ -92,7 +92,7 @@ struct entry_type {
   }
 };
 
-CollationComparator *entry_type::currentDict = NULL;
+CollationComparator *entry_type::currentDict = nullptr;
 
 class XeroxCollationComparator: public CollationComparator
 {
@@ -521,10 +521,10 @@ int main(int argc, char **argv) {
     char *localeForCharPrec = nullptr;
 
     static struct option cmdLineOptions[] = {
-      { "help", no_argument, NULL, 'h' },
-      { "verbose", no_argument, NULL, 'v' },
-      { "generate-char-precedence", required_argument, NULL, 'g' },
-      { NULL, 0, NULL, 0 }
+      { "help", no_argument, nullptr, 'h' },
+      { "verbose", no_argument, nullptr, 'v' },
+      { "generate-char-precedence", required_argument, nullptr, 'g' },
+      { nullptr, 0, nullptr, 0 }
     };
 
     int optionIndex = 0;
@@ -576,7 +576,7 @@ int main(int argc, char **argv) {
       else
         oldloc = setlocale(LC_COLLATE, localeForCharPrec);
 
-      if(oldloc == NULL) {
+      if(oldloc == nullptr) {
         std::ostringstream msg;
         msg << "Cannot set locale '" << localeForCharPrec << "'";
         throw XeroxException( msg.str().c_str() );

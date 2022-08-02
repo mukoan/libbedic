@@ -151,6 +151,7 @@ public:
 
           if(find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
             continue;
+
           // Character missing both in ignoreChars and precedence list
           std::cerr << WARNING_MSG << "character '" << std::string(t, (s-t)) <<
             "' is missing both in search-ignore-chars and char-precedence (entry " << w << ")\n";
@@ -209,20 +210,19 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
   }
 
   // Sort entries
-  {
-    fprintf(stderr, "Sorting ...\n");
-    sort(entries.begin(), entries.end());
 
-    // Check if there are duplicates
-    EntryList::iterator it, it_previous;
-    it_previous = entries.begin();  // silence static analysis warning
-    for(it = entries.begin(); it != entries.end(); ++it) {
-      if(it != entries.begin()) {
-        if(comparator->compare(it->canonizedWord, it_previous->canonizedWord) == 0)
-          std::cerr << WARNING_MSG << "duplicate entry '" << it->word << "'\n";
-      }
-      it_previous = it;
+  fprintf(stderr, "Sorting ...\n");
+  sort(entries.begin(), entries.end());
+
+  // Check if there are duplicates
+  EntryList::iterator it, it_previous;
+  it_previous = entries.begin();  // silence static analysis warning
+  for(it = entries.begin(); it != entries.end(); ++it) {
+    if(it != entries.begin()) {
+      if(comparator->compare(it->canonizedWord, it_previous->canonizedWord) == 0)
+        std::cerr << WARNING_MSG << "duplicate entry '" << it->word << "'\n";
     }
+    it_previous = it;
   }
 
   n = 0;
@@ -320,7 +320,7 @@ protected:
   
 public:
   /// Constructor
-  explicit LineReader(FILE *fh) : lineBuf(NULL), lineNo(0), fh(fh)
+  explicit LineReader(FILE *fh) : lineBuf(nullptr), lineNo(0), fh(fh)
   {
     lineBuf = new char [lineBufSize];
   }
@@ -338,8 +338,8 @@ public:
   char *readLine()
   {
     char *read = fgets(lineBuf, lineBufSize, fh);
-    if(read == NULL)
-      return NULL;
+    if(read == nullptr)
+      return nullptr;
 
     // Replace end of line (LF or CR) with Null
     int l = strlen(read);
@@ -369,7 +369,7 @@ static void readProperties(LineReader *in, std::map<std::string, std::string> &p
   {
     char *read = in->readLine();
 
-    if(read == NULL)        // EOF
+    if(read == nullptr)        // EOF
       return;
 
     if(read[0] == 0) break; // Empty line - no more properties
@@ -427,6 +427,7 @@ public:
   {
     if(fseek(fh, firstPos, SEEK_SET) != 0)
       throw XeroxException("Cannot read dictionary file (fseek failed)");
+
     return true;
   }
 
@@ -461,7 +462,7 @@ public:
 
     do {
       char *read = readLine();
-      if(read == NULL) 
+      if(read == nullptr)
         return false;
 
       keyWord = read;
@@ -471,7 +472,7 @@ public:
 
     while(true) {
       char *read = readLine();
-      if(read == NULL)
+      if(read == nullptr)
         break;
       if(read[0] == 0) break;
       if(!description.empty())
@@ -512,16 +513,16 @@ int main(int argc, char **argv)
     // Get options
 
     bool noHeader = false;
-    char *headerFile = NULL;
-    char *id = NULL;
+    char *headerFile = nullptr;
+    char *id = nullptr;
 
     static struct option cmdLineOptions[] = {
-      { "help", no_argument, NULL, 'e' },
-      { "verbose", no_argument, NULL, 'v' },
-      { "id", required_argument, NULL, 'i' },
-      { "header-file", required_argument, NULL, 'h' },
-      { "no-header", no_argument, NULL, 'n' },
-      { NULL, 0, NULL, 0 }
+      { "help", no_argument, nullptr, 'e' },
+      { "verbose", no_argument, nullptr, 'v' },
+      { "id", required_argument, nullptr, 'i' },
+      { "header-file", required_argument, nullptr, 'h' },
+      { "no-header", no_argument, nullptr, 'n' },
+      { nullptr, 0, nullptr, 0 }
     };
 
     int optionIndex = 0;
@@ -567,13 +568,13 @@ int main(int argc, char **argv)
 
       FILE *fhDic, *fhOut;
       fhDic = fopen(sourceFileName, "r");
-      errorCheck(fhDic != NULL, "Cannot open input file for reading");
-      if(!strcmp(destFileName, "-" ))
+      errorCheck(fhDic != nullptr, "Cannot open input file for reading");
+      if(!strcmp(destFileName, "-"))
         fhOut = stdout;
       else
         fhOut = fopen(destFileName, "wb");
 
-      errorCheck(fhOut != NULL, "Cannot open output file for writing");
+      errorCheck(fhOut != nullptr, "Cannot open output file for writing");
 
       // Read properties
 
@@ -587,38 +588,35 @@ int main(int argc, char **argv)
 
       source.setFirstPos();
 
-      if(headerFile != NULL) {
+      if(headerFile != nullptr) {
         FILE *fhHeader;
         if(!strcmp( headerFile, "-"))
           fhHeader = stdin;
         else
           fhHeader = fopen(headerFile, "r");
 
-        errorCheck(fhHeader != NULL, "Cannot open header file for reading");
+        errorCheck(fhHeader != nullptr, "Cannot open header file for reading");
         LineReader headerLR(fhHeader);
         readProperties(&headerLR, properties);
         if(fhHeader != stdout) fclose(fhHeader);
       }
 
-      if(id != NULL)
+      if(id != nullptr)
         properties["id"] = id;
 
-      {
-        std::string precedence = properties["char-precedence"];
-        std::string ic = properties["search-ignore-chars"];
+      std::string precedence = properties["char-precedence"];
+      std::string ic = properties["search-ignore-chars"];
 
-        if(ic.size() == 0) {
-          ic = !precedence.empty() ? "" : "-.";
-          properties["search-ignore-chars"] = ic;
-        }
-        comparator.setCollation(precedence, ic);
+      if(ic.size() == 0) {
+        ic = !precedence.empty() ? "" : "-.";
+        properties["search-ignore-chars"] = ic;
       }
+      comparator.setCollation(precedence, ic);
 
       errorCheck(properties.find("id") != properties.end(),
                  "missing required 'id' property in the header");
 
       // Build, sort and output dictionary
-
       processXerox(&comparator, &source, properties, fhOut);
 
       // Clean up

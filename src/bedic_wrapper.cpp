@@ -102,9 +102,8 @@ public:
       return false;
 
     bool moved = dic->nextEntry();
-    if(!moved) {
+    if(!moved)
       lastEntry = true;
-    }
 
     if(dic->getError() != "")
       return false;
@@ -144,9 +143,8 @@ DictionaryIteratorPtr BedicDictionary::findEntry(const char *keyword, bool &matc
   bool subword;
   matches = dic->findEntry(keyword, subword);
 
-  if(dic->getError() != "") {
+  if(dic->getError() != "")
     return DictionaryIteratorPtr(nullptr);
-  }
 
   return DictionaryIteratorPtr(new BedicDictionaryIterator(dic, false));
 }

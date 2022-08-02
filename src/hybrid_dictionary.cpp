@@ -211,8 +211,8 @@ DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary
 {
 
   DynamicDictionary *dynamic_dic = createSQLiteDictionary(fileName, static_dic->getName(), errorMessage);
-  if(dynamic_dic == NULL)
-    return NULL;
+  if(dynamic_dic == nullptr)
+    return nullptr;
 
   {
     std::string collation_def;
@@ -223,7 +223,7 @@ DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary
       if(!success) {
         errorMessage = dynamic_dic->getErrorMessage();
         delete dynamic_dic;
-        return NULL;
+        return nullptr;
       }
     }
   }
@@ -240,7 +240,7 @@ DynamicDictionary *createHybridDictionary(const char *fileName, StaticDictionary
       if(!success) {
         errorMessage = dynamic_dic->getErrorMessage();
         delete dynamic_dic;
-        return NULL;
+        return nullptr;
       }
     }
   }
@@ -265,16 +265,16 @@ DynamicDictionary *loadHybridDictionary(const char *fileName, std::string &error
 {
   std::string static_file_name = fileName;
   int len = static_file_name.size();
-  if(len < 6) return NULL;
+  if(len < 6) return nullptr;
   if(static_file_name.substr(len - 5) != ".hdic") {
     errorMessage = "Invalid hybrid dictionary extension";
-    return NULL;
+    return nullptr;
   }
   static_file_name.replace(len-5, 5, ".dic.dz");
 
   DynamicDictionary *dynamic_dic = loadSQLiteDictionary(fileName, errorMessage);
-  if(dynamic_dic == NULL)
-    return NULL;
+  if(dynamic_dic == nullptr)
+    return nullptr;
 
 //   std::string static_file_name;
 //   bool success = dynamic_dic->getProperty( "static-dic", static_file_name );
@@ -285,9 +285,9 @@ DynamicDictionary *loadHybridDictionary(const char *fileName, std::string &error
 //   }
 
   StaticDictionary *static_dic = loadBedicDictionary(static_file_name.c_str(), false, errorMessage);
-  if(static_dic == NULL) {
+  if(static_dic == nullptr) {
     delete dynamic_dic;
-    return NULL;
+    return nullptr;
   }
 
   return new HybridDictionary(static_dic, dynamic_dic);
@@ -340,8 +340,7 @@ bool HybridDictionary::updateEntry(const DictionaryIteratorPtr &entry, const cha
   DictionaryIteratorPtr placeHolder = dynamic_dic->findEntry(entry->getKeyword(), matches);
   if(!matches) {
     placeHolder = dynamic_dic->insertEntry(entry->getKeyword());
-    if(!placeHolder.isValid())
-      return false;
+    if(!placeHolder.isValid()) return false;
   }
 
   return dynamic_dic->updateEntry(placeHolder, description);
