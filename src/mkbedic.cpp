@@ -149,7 +149,7 @@ public:
           if(charPrecedence.find(rune) != charPrecedence.end())
             continue;
 
-          if(find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
+          if(std::find(ignoreChars.begin(), ignoreChars.end(), std::string(t, (s-t))) != ignoreChars.end())
             continue;
 
           // Character missing both in ignoreChars and precedence list
@@ -178,7 +178,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
   unsigned int mwl = 0;    // maximum word length
   long dsize = 0;          // dictionary size
 
-  fprintf(stderr, "Reading the entries ...\n");
+  std::cerr << "Reading the entries ...\n";
 
   int n = 0;
   dictSource->firstEntry();
@@ -211,8 +211,8 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
 
   // Sort entries
 
-  fprintf(stderr, "Sorting ...\n");
-  sort(entries.begin(), entries.end());
+  std::cerr << "Sorting ...\n";
+  std::sort(entries.begin(), entries.end());
 
   // Check if there are duplicates
   EntryList::iterator it, it_previous;
@@ -246,7 +246,7 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
 
   // Save the dictionary properties
 
-  fprintf(stderr, "Saving the dictionary\n");
+  std::cerr << "Saving the dictionary\n";
   std::map<std::string, std::string> prop(properties);
   char buf[256];
 
@@ -291,11 +291,11 @@ void processXerox(XeroxCollationComparator *comparator, DictionarySource *dictSo
     fwrite("\x00", 1, 1, fhOut);
 
     if(i % 1024 == 0) {
-      fprintf(stderr, ".");
+      std::cerr << ".";
     }
   }
 
-  fprintf(stderr, "\n");
+  std::cerr << "\n";
 }
 
 
@@ -372,7 +372,7 @@ static void readProperties(LineReader *in, std::map<std::string, std::string> &p
     if(read == nullptr)        // EOF
       return;
 
-    if(read[0] == 0) break; // Empty line - no more properties
+    if(read[0] == 0) break;    // Empty line - no more properties
 
     std::string line = read;
 

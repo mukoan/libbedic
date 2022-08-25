@@ -229,7 +229,7 @@ bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
 
   std::set<int> usedCharacters;
 
-  fprintf(stderr, "Reading the entries ...\n");
+  std::cerr << "Reading the entries ...\n";
   int n = 0;
   firstEntry();
   do {
@@ -311,7 +311,7 @@ bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
 
   // Sort entries
   if(do_sort) {
-    fprintf(stderr, "Sorting ...\n");
+    std::cerr << "Sorting ...\n";
     sort(entries.begin(), entries.end());
 
     //Check if there are duplicates
@@ -345,7 +345,7 @@ bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
   delete []ibuf;
 
   // saving the dictionary properties
-  fprintf(stderr, "Saving the dictionary\n");
+  std::cerr << "Saving the dictionary\n";
   std::map<std::string, std::string> prop(properties);
   char buf[256];
 
@@ -425,10 +425,10 @@ bool XeroxDict::xerox(int fd, const std::string &compress_method, bool do_sort)
     write(fd, ddelim, sizeof(ddelim));
 
     if(i % 1024 == 0) {
-      fprintf(stderr, ".");
+      std::cerr << ".";
     }
   }
-  fprintf(stderr, "\n");
+  std::cerr << "\n";
 
   return true;
 }
